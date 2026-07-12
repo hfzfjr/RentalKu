@@ -1,65 +1,79 @@
-import Image from "next/image";
+import { mockUnits, mockPenyewa } from "@/lib/mock-data";
 
-export default function Home() {
+export default function DashboardPage() {
+  // Calculate stats from mock data
+  const totalUnits = mockUnits.length;
+  const availableUnits = mockUnits.filter((u) => u.status === "tersedia").length;
+  const rentedUnits = mockUnits.filter((u) => u.status === "disewa").length;
+  const totalTenants = mockPenyewa.length;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">Ringkasan aktivitas rental kendaraan Anda</p>
+      </div>
+
+      {/* Stat Cards Grid */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatCard
+          title="Total Unit"
+          value={totalUnits}
+          icon="🚗"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+        <StatCard
+          title="Unit Tersedia"
+          value={availableUnits}
+          icon="✅"
+        />
+        <StatCard
+          title="Unit Disewa"
+          value={rentedUnits}
+          icon="🛒"
+        />
+        <StatCard
+          title="Total Penyewa"
+          value={totalTenants}
+          icon="👥"
+        />
+      </section>
+
+      {/* Recent Rentals Table */}
+      <section className="bg-card border rounded-lg shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-foreground">Penyewaan Terbaru</h3>
+          <button className="text-primary text-sm hover:underline flex items-center gap-1">
+            Lihat Semua →
+          </button>
+        </div>
+        <div className="p-6">
+          {/* Empty State - No rental data yet */}
+          <div className="text-center py-12">
+            <div className="text-5xl mb-4">📋</div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Belum ada transaksi penyewaan</h3>
+            <p className="text-muted-foreground">Data penyewaan akan muncul di sini setelah Anda membuat transaksi penyewaan.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function StatCard({ title, value, icon }: { title: string; value: number; icon: string }) {
+  return (
+    <div className="bg-card border rounded-lg p-6 shadow-sm hover:shadow-md transition-all">
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+            {title}
           </p>
+          <h3 className="text-2xl font-bold text-foreground">{value}</h3>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
+          {icon}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
