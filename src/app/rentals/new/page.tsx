@@ -2,64 +2,77 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { mockUnits, mockPenyewa, mockPenyewaan, Unit, Penyewa, Penyewaan } from "@/lib/mock-data";
+import { supabase } from "@/lib/supabase";
+import { Unit, Tenant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 
 export default function NewRentalPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    unitId: "",
-    penyewaId: "",
-    tanggalMulai: "",
-    tanggalSelesai: "",
+    unit_id: "",
+    tenant_id: "",
+    tanggal_mulai: "",
+    tanggal_selesai: "",
     catatan: "",
   });
   const [units, setUnits] = useState<Unit[]>([]);
-  const [tenants, setTenants] = useState<Penyewa[]>([]);
-  const [penyewaan, setPenyewaan] = useState<Penyewaan[]>([]);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load data from localStorage or mock data
   useEffect(() => {
-    const storedUnits = localStorage.getItem("mockUnits");
-    const storedTenants = localStorage.getItem("mockTenants");
-    const storedPenyewaan = localStorage.getItem("mockPenyewaan");
-
-    setUnits(storedUnits ? JSON.parse(storedUnits) : mockUnits);
-    setTenants(storedTenants ? JSON.parse(storedTenants) : mockPenyewa);
-    setPenyewaan(storedPenyewaan ? JSON.parse(storedPenyewaan) : mockPenyewaan);
+    fetchData();
   }, []);
+
+  async function fetchData() {
+    try {
+      const [unitsData, tenantsData] = await Promise.all([
+        supabase.from('units').select('*'),
+        supabase.from('tenants').select('*'),
+      ]);
+
+      if (unitsData.error) throw unitsData.error;
+      if (tenantsData.error) throw tenantsData.error;
+
+      setUnits(unitsData.data || []);
+      setTenants(tenantsData.data || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // Filter only available units
   const availableUnits = units.filter((unit) => unit.status === "tersedia");
 
   // Calculate total price
-  const selectedUnit = units.find((u) => u.id === formData.unitId);
-  const totalPrice = selectedUnit && formData.tanggalMulai && formData.tanggalSelesai
+  const selectedUnit = units.find((u) => u.id === formData.unit_id);
+  const totalPrice = selectedUnit && formData.tanggal_mulai && formData.tanggal_selesai
     ? (() => {
-      const startDate = new Date(formData.tanggalMulai);
-      const endDate = new Date(formData.tanggalSelesai);
+      const startDate = new Date(formData.tanggal_mulai);
+      const endDate = new Date(formData.tanggal_selesai);
       const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      return Math.max(1, days) * selectedUnit.hargaSewaPerHari;
+      return Math.max(1, days) * selectedUnit.harga_sewa_per_hari;
     })()
     : 0;
 
-  const duration = formData.tanggalMulai && formData.tanggalSelesai
+  const duration = formData.tanggal_mulai && formData.tanggal_selesai
     ? (() => {
-      const startDate = new Date(formData.tanggalMulai);
-      const endDate = new Date(formData.tanggalSelesai);
+      const startDate = new Date(formData.tanggal_mulai);
+      const endDate = new Date(formData.tanggal_selesai);
       return Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
     })()
     : 0;
 
-  const isFormValid = formData.unitId && formData.penyewaId && formData.tanggalMulai && formData.tanggalSelesai;
+  const isFormValid = formData.unit_id && formData.tenant_id && formData.tanggal_mulai && formData.tanggal_selesai;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isFormValid) {
@@ -67,28 +80,35 @@ export default function NewRentalPage() {
       return;
     }
 
-    // Create new penyewaan record
-    const newPenyewaan: Penyewaan = {
-      id: Date.now().toString(),
-      unitId: formData.unitId,
-      penyewaId: formData.penyewaId,
-      tanggalMulai: formData.tanggalMulai,
-      tanggalSelesai: formData.tanggalSelesai,
-      status: "berlangsung",
-    };
+    try {
+      // Create new rental record
+      const { error: rentalError } = await supabase
+        .from('rentals')
+        .insert({
+          unit_id: formData.unit_id,
+          tenant_id: formData.tenant_id,
+          tanggal_mulai: formData.tanggal_mulai,
+          tanggal_selesai: formData.tanggal_selesai,
+          status: 'berlangsung',
+          catatan: formData.catatan || null,
+        });
 
-    // Update penyewaan list
-    const updatedPenyewaan = [...penyewaan, newPenyewaan];
-    localStorage.setItem("mockPenyewaan", JSON.stringify(updatedPenyewaan));
+      if (rentalError) throw rentalError;
 
-    // Update unit status to "disewa"
-    const updatedUnits = units.map((unit) =>
-      unit.id === formData.unitId ? { ...unit, status: "disewa" as const } : unit
-    );
-    localStorage.setItem("mockUnits", JSON.stringify(updatedUnits));
+      // Update unit status to "disewa"
+      const { error: unitError } = await supabase
+        .from('units')
+        .update({ status: 'disewa' })
+        .eq('id', formData.unit_id);
 
-    // Redirect to /rentals
-    router.push("/rentals");
+      if (unitError) throw unitError;
+
+      // Redirect to /rentals
+      router.push("/rentals");
+    } catch (error) {
+      console.error('Error creating rental:', error);
+      alert("Gagal membuat penyewaan. Silakan coba lagi.");
+    }
   };
 
   return (
@@ -126,9 +146,9 @@ export default function NewRentalPage() {
                       🚗
                     </span>
                     <select
-                      id="unitId"
-                      name="unitId"
-                      value={formData.unitId}
+                      id="unit_id"
+                      name="unit_id"
+                      value={formData.unit_id}
                       onChange={handleInputChange}
                       required
                       className="w-full pl-10 pr-4 py-2 bg-background border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none"
@@ -139,7 +159,7 @@ export default function NewRentalPage() {
                       ) : (
                         availableUnits.map((unit) => (
                           <option key={unit.id} value={unit.id}>
-                            {unit.nama} ({unit.platNomor}) - Rp {unit.hargaSewaPerHari.toLocaleString("id-ID")}/hari
+                            {unit.nama} ({unit.plat_nomor}) - Rp {unit.harga_sewa_per_hari.toLocaleString("id-ID")}/hari
                           </option>
                         ))
                       )}
@@ -152,7 +172,7 @@ export default function NewRentalPage() {
 
                 {/* Tenant Selection */}
                 <div>
-                  <label htmlFor="penyewaId" className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label htmlFor="tenant_id" className="block text-sm font-medium text-muted-foreground mb-2">
                     Pilih Penyewa <span className="text-destructive">*</span>
                   </label>
                   <div className="relative">
@@ -160,9 +180,9 @@ export default function NewRentalPage() {
                       👤
                     </span>
                     <select
-                      id="penyewaId"
-                      name="penyewaId"
-                      value={formData.penyewaId}
+                      id="tenant_id"
+                      name="tenant_id"
+                      value={formData.tenant_id}
                       onChange={handleInputChange}
                       required
                       className="w-full pl-10 pr-4 py-2 bg-background border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none"
@@ -173,7 +193,7 @@ export default function NewRentalPage() {
                       ) : (
                         tenants.map((tenant) => (
                           <option key={tenant.id} value={tenant.id}>
-                            {tenant.nama} ({tenant.noHp})
+                            {tenant.nama} ({tenant.no_hp})
                           </option>
                         ))
                       )}
@@ -194,7 +214,7 @@ export default function NewRentalPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Start Date */}
                 <div>
-                  <label htmlFor="tanggalMulai" className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label htmlFor="tanggal_mulai" className="block text-sm font-medium text-muted-foreground mb-2">
                     Tanggal Mulai <span className="text-destructive">*</span>
                   </label>
                   <div className="relative">
@@ -202,10 +222,10 @@ export default function NewRentalPage() {
                       📅
                     </span>
                     <input
-                      id="tanggalMulai"
-                      name="tanggalMulai"
+                      id="tanggal_mulai"
+                      name="tanggal_mulai"
                       type="date"
-                      value={formData.tanggalMulai}
+                      value={formData.tanggal_mulai}
                       onChange={handleInputChange}
                       required
                       className="w-full pl-10 pr-4 py-2 bg-background border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -215,7 +235,7 @@ export default function NewRentalPage() {
 
                 {/* End Date */}
                 <div>
-                  <label htmlFor="tanggalSelesai" className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label htmlFor="tanggal_selesai" className="block text-sm font-medium text-muted-foreground mb-2">
                     Tanggal Selesai <span className="text-destructive">*</span>
                   </label>
                   <div className="relative">
@@ -223,10 +243,10 @@ export default function NewRentalPage() {
                       📅
                     </span>
                     <input
-                      id="tanggalSelesai"
-                      name="tanggalSelesai"
+                      id="tanggal_selesai"
+                      name="tanggal_selesai"
                       type="date"
-                      value={formData.tanggalSelesai}
+                      value={formData.tanggal_selesai}
                       onChange={handleInputChange}
                       required
                       className="w-full pl-10 pr-4 py-2 bg-background border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -279,7 +299,7 @@ export default function NewRentalPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Harga Sewa/Hari</span>
                   <span className="text-sm font-mono text-foreground">
-                    Rp {selectedUnit ? selectedUnit.hargaSewaPerHari.toLocaleString("id-ID") : "0"}
+                    Rp {selectedUnit ? selectedUnit.harga_sewa_per_hari.toLocaleString("id-ID") : "0"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { mockPenyewa, Penyewa } from "@/lib/mock-data";
+import { supabase } from "@/lib/supabase";
+import { Tenant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { TenantDialog } from "@/components/tenants/TenantDialog";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
@@ -9,16 +10,37 @@ import { SidebarLayout } from "@/components/layout/SidebarLayout";
 export default function TenantsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTenant, setEditingTenant] = useState<Penyewa | undefined>(undefined);
+  const [editingTenant, setEditingTenant] = useState<Tenant | undefined>(undefined);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [tenantToDelete, setTenantToDelete] = useState<Penyewa | undefined>(undefined);
-  const [tenants, setTenants] = useState(mockPenyewa);
+  const [tenantToDelete, setTenantToDelete] = useState<Tenant | undefined>(undefined);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  useEffect(() => {
+    fetchTenants();
+  }, []);
+
+  async function fetchTenants() {
+    try {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTenants(data || []);
+    } catch (error) {
+      console.error('Error fetching tenants:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const filteredTenants = tenants.filter((tenant) =>
     tenant.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tenant.noHp.includes(searchQuery)
+    tenant.no_hp.includes(searchQuery)
   );
 
   const totalPages = Math.ceil(filteredTenants.length / itemsPerPage);
@@ -45,41 +67,54 @@ export default function TenantsPage() {
     setIsDialogOpen(true);
   };
 
-  const handleOpenEditDialog = (tenant: Penyewa) => {
+  const handleOpenEditDialog = (tenant: Tenant) => {
     setEditingTenant(tenant);
     setIsDialogOpen(true);
   };
 
-  const handleSaveTenant = (tenantData: Omit<Penyewa, "id">) => {
-    if (editingTenant) {
-      // Edit mode - update existing tenant
-      setTenants((prev) =>
-        prev.map((t) =>
-          t.id === editingTenant.id ? { ...t, ...tenantData } : t
-        )
-      );
-    } else {
-      // Add mode - create new tenant
-      const newTenant: Penyewa = {
-        id: Date.now().toString(),
-        ...tenantData,
-      };
-      setTenants((prev) => [...prev, newTenant]);
+  const handleSaveTenant = async (tenantData: Omit<Tenant, "id" | "created_at" | "updated_at">) => {
+    try {
+      if (editingTenant) {
+        // Edit mode - update existing tenant
+        const { error } = await supabase
+          .from('tenants')
+          .update(tenantData)
+          .eq('id', editingTenant.id);
+        if (error) throw error;
+      } else {
+        // Add mode - create new tenant
+        const { error } = await supabase
+          .from('tenants')
+          .insert(tenantData);
+        if (error) throw error;
+      }
+      await fetchTenants();
+      setIsDialogOpen(false);
+      setEditingTenant(undefined);
+    } catch (error) {
+      console.error('Error saving tenant:', error);
     }
-    setIsDialogOpen(false);
-    setEditingTenant(undefined);
   };
 
-  const handleOpenDeleteDialog = (tenant: Penyewa) => {
+  const handleOpenDeleteDialog = (tenant: Tenant) => {
     setTenantToDelete(tenant);
     setShowDeleteDialog(true);
   };
 
-  const handleDeleteTenant = () => {
+  const handleDeleteTenant = async () => {
     if (tenantToDelete) {
-      setTenants((prev) => prev.filter((t) => t.id !== tenantToDelete.id));
-      setShowDeleteDialog(false);
-      setTenantToDelete(undefined);
+      try {
+        const { error } = await supabase
+          .from('tenants')
+          .delete()
+          .eq('id', tenantToDelete.id);
+        if (error) throw error;
+        await fetchTenants();
+        setShowDeleteDialog(false);
+        setTenantToDelete(undefined);
+      } catch (error) {
+        console.error('Error deleting tenant:', error);
+      }
     }
   };
 
@@ -166,8 +201,8 @@ export default function TenantsPage() {
                         <span className="font-medium text-foreground">{tenant.nama}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-muted-foreground">{tenant.noHp}</td>
-                    <td className="px-6 py-4 font-mono text-sm text-muted-foreground">{tenant.noKtp}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{tenant.no_hp}</td>
+                    <td className="px-6 py-4 font-mono text-sm text-muted-foreground">{tenant.no_ktp}</td>
                     <td className="px-6 py-4 text-muted-foreground max-w-50 truncate">{tenant.alamat}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -222,11 +257,11 @@ export default function TenantsPage() {
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground mb-1">No. HP</p>
-                    <p className="text-sm text-foreground">{tenant.noHp}</p>
+                    <p className="text-sm text-foreground">{tenant.no_hp}</p>
                   </div>
                   <div>
                     <p className="text-xs font-medium text-muted-foreground mb-1">No. KTP</p>
-                    <p className="text-sm font-mono text-foreground truncate">{tenant.noKtp}</p>
+                    <p className="text-sm font-mono text-foreground truncate">{tenant.no_ktp}</p>
                   </div>
                   <div className="col-span-2">
                     <p className="text-xs font-medium text-muted-foreground mb-1">Alamat</p>

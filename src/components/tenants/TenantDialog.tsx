@@ -2,37 +2,37 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Penyewa } from "@/lib/mock-data";
+import { Tenant } from "@/lib/types";
 
 interface TenantDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (tenant: Omit<Penyewa, "id">) => void;
-  tenant?: Penyewa; // If provided, it's edit mode
+  onSave: (tenant: Omit<Tenant, "id" | "created_at" | "updated_at">) => void;
+  tenant?: Tenant; // If provided, it's edit mode
 }
 
 export function TenantDialog({ isOpen, onClose, onSave, tenant }: TenantDialogProps) {
   const [formData, setFormData] = useState({
     nama: "",
-    noHp: "",
+    no_hp: "",
     alamat: "",
-    noKtp: "",
+    no_ktp: "",
   });
 
   useEffect(() => {
     if (tenant) {
       setFormData({
         nama: tenant.nama,
-        noHp: tenant.noHp,
+        no_hp: tenant.no_hp,
         alamat: tenant.alamat,
-        noKtp: tenant.noKtp,
+        no_ktp: tenant.no_ktp,
       });
     } else {
       setFormData({
         nama: "",
-        noHp: "",
+        no_hp: "",
         alamat: "",
-        noKtp: "",
+        no_ktp: "",
       });
     }
   }, [tenant, isOpen]);
@@ -44,9 +44,9 @@ export function TenantDialog({ isOpen, onClose, onSave, tenant }: TenantDialogPr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form
-    if (!formData.nama || !formData.noKtp || !formData.noHp || !formData.alamat) {
+    if (!formData.nama || !formData.no_ktp || !formData.no_hp || !formData.alamat) {
       alert("Mohon lengkapi semua data");
       return;
     }
@@ -104,14 +104,14 @@ export function TenantDialog({ isOpen, onClose, onSave, tenant }: TenantDialogPr
 
             {/* Input: No. KTP */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="noKtp" className="text-sm font-medium text-muted-foreground">
+              <label htmlFor="no_ktp" className="text-sm font-medium text-muted-foreground">
                 Nomor KTP (NIK)
               </label>
               <input
-                id="noKtp"
-                name="noKtp"
+                id="no_ktp"
+                name="no_ktp"
                 type="text"
-                value={formData.noKtp}
+                value={formData.no_ktp}
                 onChange={handleInputChange}
                 placeholder="16 digit angka"
                 required
@@ -122,7 +122,7 @@ export function TenantDialog({ isOpen, onClose, onSave, tenant }: TenantDialogPr
 
             {/* Input: No. HP */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="noHp" className="text-sm font-medium text-muted-foreground">
+              <label htmlFor="no_hp" className="text-sm font-medium text-muted-foreground">
                 Nomor HP
               </label>
               <div className="relative">
@@ -130,10 +130,10 @@ export function TenantDialog({ isOpen, onClose, onSave, tenant }: TenantDialogPr
                   <span className="text-muted-foreground text-sm">+62</span>
                 </div>
                 <input
-                  id="noHp"
-                  name="noHp"
+                  id="no_hp"
+                  name="no_hp"
                   type="tel"
-                  value={formData.noHp}
+                  value={formData.no_hp}
                   onChange={handleInputChange}
                   placeholder="8123456789"
                   required

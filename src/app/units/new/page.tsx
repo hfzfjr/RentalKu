@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 
@@ -10,16 +11,17 @@ export default function NewUnitPage() {
   const [formData, setFormData] = useState({
     nama: "",
     jenis: "motor" as "motor" | "mobil",
-    platNomor: "",
-    hargaSewaPerHari: 0,
+    plat_nomor: "",
+    harga_sewa_per_hari: 0,
     status: "tersedia" as "tersedia" | "disewa",
+    image_url: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "hargaSewaPerHari" ? Number(value) : value,
+      [name]: name === "harga_sewa_per_hari" ? Number(value) : value,
     }));
   };
 
@@ -27,26 +29,31 @@ export default function NewUnitPage() {
     setFormData((prev) => ({ ...prev, status }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate form
-    if (!formData.nama || !formData.platNomor || formData.hargaSewaPerHari <= 0) {
+    if (!formData.nama || !formData.plat_nomor || formData.harga_sewa_per_hari <= 0) {
       alert("Mohon lengkapi semua data dengan benar");
       return;
     }
 
-    // Create new unit object
-    const newUnit = {
-      id: Date.now().toString(), // Simple ID generation
-      ...formData,
-    };
+    try {
+      const { error } = await supabase
+        .from('units')
+        .insert({
+          nama: formData.nama,
+          jenis: formData.jenis,
+          plat_nomor: formData.plat_nomor,
+          harga_sewa_per_hari: formData.harga_sewa_per_hari,
+          status: formData.status,
+          image_url: formData.image_url || null,
+        });
 
-    // For now, we'll store in localStorage to persist across page reloads
-    const existingUnits = JSON.parse(localStorage.getItem("mockUnits") || "[]");
-    const updatedUnits = [...existingUnits, newUnit];
-    localStorage.setItem("mockUnits", JSON.stringify(updatedUnits));
-
-    // Redirect to /units after save
-    router.push("/units");
+      if (error) throw error;
+      router.push("/units");
+    } catch (error) {
+      console.error('Error creating unit:', error);
+      alert("Gagal menyimpan unit. Silakan coba lagi.");
+    }
   };
 
   const isAvailable = formData.status === "tersedia";
@@ -129,14 +136,14 @@ export default function NewUnitPage() {
 
               {/* Plat Nomor */}
               <div className="flex flex-col gap-2">
-                <label htmlFor="platNomor" className="text-sm font-medium text-muted-foreground">
+                <label htmlFor="plat_nomor" className="text-sm font-medium text-muted-foreground">
                   Plat Nomor
                 </label>
                 <input
-                  id="platNomor"
-                  name="platNomor"
+                  id="plat_nomor"
+                  name="plat_nomor"
                   type="text"
-                  value={formData.platNomor}
+                  value={formData.plat_nomor}
                   onChange={handleInputChange}
                   placeholder="Contoh: B 1234 ABC"
                   className="w-full bg-background border rounded-lg px-4 py-2 text-foreground uppercase focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
@@ -145,16 +152,16 @@ export default function NewUnitPage() {
 
               {/* Harga Sewa */}
               <div className="flex flex-col gap-2 md:col-span-2">
-                <label htmlFor="hargaSewaPerHari" className="text-sm font-medium text-muted-foreground">
+                <label htmlFor="harga_sewa_per_hari" className="text-sm font-medium text-muted-foreground">
                   Harga Sewa per Hari
                 </label>
                 <div className="relative flex items-center">
                   <span className="absolute left-4 text-muted-foreground">Rp</span>
                   <input
-                    id="hargaSewaPerHari"
-                    name="hargaSewaPerHari"
+                    id="harga_sewa_per_hari"
+                    name="harga_sewa_per_hari"
                     type="number"
-                    value={formData.hargaSewaPerHari || ""}
+                    value={formData.harga_sewa_per_hari || ""}
                     onChange={handleInputChange}
                     placeholder="0"
                     min="0"

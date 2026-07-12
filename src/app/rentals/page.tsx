@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { mockPenyewaan, mockUnits, mockPenyewa } from "@/lib/mock-data";
+import { supabase } from "@/lib/supabase";
+import { Rental, Unit, Tenant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -11,36 +12,52 @@ type StatusFilter = "semua" | "berlangsung" | "selesai";
 
 export default function RentalsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("semua");
-  const [penyewaan, setPenyewaan] = useState(mockPenyewaan);
-  const [units, setUnits] = useState(mockUnits);
-  const [tenants, setTenants] = useState(mockPenyewa);
+  const [rentals, setRentals] = useState<Rental[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load data from localStorage or mock data
   useEffect(() => {
-    const storedUnits = localStorage.getItem("mockUnits");
-    const storedTenants = localStorage.getItem("mockTenants");
-    const storedPenyewaan = localStorage.getItem("mockPenyewaan");
-
-    setUnits(storedUnits ? JSON.parse(storedUnits) : mockUnits);
-    setTenants(storedTenants ? JSON.parse(storedTenants) : mockPenyewa);
-    setPenyewaan(storedPenyewaan ? JSON.parse(storedPenyewaan) : mockPenyewaan);
+    fetchData();
   }, []);
 
-  // Join penyewaan with unit and penyewa data
-  const rentalsWithDetails = penyewaan.map((penyewaan) => {
-    const unit = units.find((u) => u.id === penyewaan.unitId);
-    const penyewa = tenants.find((p) => p.id === penyewaan.penyewaId);
+  async function fetchData() {
+    try {
+      const [rentalsData, unitsData, tenantsData] = await Promise.all([
+        supabase.from('rentals').select('*').order('created_at', { ascending: false }),
+        supabase.from('units').select('*'),
+        supabase.from('tenants').select('*'),
+      ]);
+
+      if (rentalsData.error) throw rentalsData.error;
+      if (unitsData.error) throw unitsData.error;
+      if (tenantsData.error) throw tenantsData.error;
+
+      setRentals(rentalsData.data || []);
+      setUnits(unitsData.data || []);
+      setTenants(tenantsData.data || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Join rentals with unit and tenant data
+  const rentalsWithDetails = rentals.map((rental) => {
+    const unit = units.find((u) => u.id === rental.unit_id);
+    const tenant = tenants.find((t) => t.id === rental.tenant_id);
 
     // Calculate total price based on rental duration
-    const startDate = new Date(penyewaan.tanggalMulai);
-    const endDate = new Date(penyewaan.tanggalSelesai);
+    const startDate = new Date(rental.tanggal_mulai);
+    const endDate = new Date(rental.tanggal_selesai);
     const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    const totalPrice = unit ? unit.hargaSewaPerHari * days : 0;
+    const totalPrice = unit ? unit.harga_sewa_per_hari * days : 0;
 
     return {
-      ...penyewaan,
+      ...rental,
       unit,
-      penyewa,
+      tenant,
       totalPrice,
     };
   });
@@ -150,16 +167,16 @@ export default function RentalsPage() {
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full ${getAvatarColor(index)} flex items-center justify-center text-sm font-medium`}>
-                          {rental.penyewa ? getInitials(rental.penyewa.nama) : "--"}
+                          {rental.tenant ? getInitials(rental.tenant.nama) : "--"}
                         </div>
                         <span className="font-medium text-foreground">
-                          {rental.penyewa?.nama || "Unknown"}
+                          {rental.tenant?.nama || "Unknown"}
                         </span>
                       </div>
                     </td>
                     <td className="py-4 px-4 text-foreground">{rental.unit?.nama || "Unknown"}</td>
-                    <td className="py-4 px-4 text-muted-foreground">{formatDate(rental.tanggalMulai)}</td>
-                    <td className="py-4 px-4 text-muted-foreground">{formatDate(rental.tanggalSelesai)}</td>
+                    <td className="py-4 px-4 text-muted-foreground">{formatDate(rental.tanggal_mulai)}</td>
+                    <td className="py-4 px-4 text-muted-foreground">{formatDate(rental.tanggal_selesai)}</td>
                     <td className="py-4 px-4 font-mono text-sm text-foreground">
                       Rp {rental.totalPrice.toLocaleString("id-ID")}
                     </td>
@@ -188,11 +205,11 @@ export default function RentalsPage() {
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full ${getAvatarColor(index)} flex items-center justify-center text-sm font-medium`}>
-                      {rental.penyewa ? getInitials(rental.penyewa.nama) : "--"}
+                      {rental.tenant ? getInitials(rental.tenant.nama) : "--"}
                     </div>
                     <div>
                       <div className="font-medium text-foreground">
-                        {rental.penyewa?.nama || "Unknown"}
+                        {rental.tenant?.nama || "Unknown"}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {rental.unit?.nama || "Unknown"}
@@ -206,11 +223,11 @@ export default function RentalsPage() {
                 <div className="grid grid-cols-2 gap-2 mb-3 bg-muted p-3 rounded-lg border border-border/50">
                   <div>
                     <div className="text-xs text-muted-foreground uppercase">Mulai</div>
-                    <div className="text-sm text-foreground">{formatDate(rental.tanggalMulai)}</div>
+                    <div className="text-sm text-foreground">{formatDate(rental.tanggal_mulai)}</div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground uppercase">Selesai</div>
-                    <div className="text-sm text-foreground">{formatDate(rental.tanggalSelesai)}</div>
+                    <div className="text-sm text-foreground">{formatDate(rental.tanggal_selesai)}</div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">

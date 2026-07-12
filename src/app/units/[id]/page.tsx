@@ -2,44 +2,61 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { mockUnits } from "@/lib/mock-data";
+import { supabase } from "@/lib/supabase";
+import { Unit } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 
 export default function UnitDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [unit, setUnit] = useState<typeof mockUnits[0] | null>(null);
+  const [unit, setUnit] = useState<Unit | null>(null);
   const [formData, setFormData] = useState({
     nama: "",
     jenis: "motor" as "motor" | "mobil",
-    platNomor: "",
-    hargaSewaPerHari: 0,
+    plat_nomor: "",
+    harga_sewa_per_hari: 0,
     status: "tersedia" as "tersedia" | "disewa",
+    image_url: "",
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Find unit by ID from mock data
-    const foundUnit = mockUnits.find((u) => u.id === params.id);
-    if (foundUnit) {
-      setUnit(foundUnit);
-      setFormData({
-        nama: foundUnit.nama,
-        jenis: foundUnit.jenis,
-        platNomor: foundUnit.platNomor,
-        hargaSewaPerHari: foundUnit.hargaSewaPerHari,
-        status: foundUnit.status,
-      });
-    }
-    setIsLoading(false);
+    fetchUnit();
   }, [params.id]);
+
+  async function fetchUnit() {
+    try {
+      const { data, error } = await supabase
+        .from('units')
+        .select('*')
+        .eq('id', params.id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setUnit(data);
+        setFormData({
+          nama: data.nama,
+          jenis: data.jenis,
+          plat_nomor: data.plat_nomor,
+          harga_sewa_per_hari: data.harga_sewa_per_hari,
+          status: data.status,
+          image_url: data.image_url || "",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching unit:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "hargaSewaPerHari" ? Number(value) : value,
+      [name]: name === "harga_sewa_per_hari" ? Number(value) : value,
     }));
   };
 
@@ -47,17 +64,40 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
     setFormData((prev) => ({ ...prev, status }));
   };
 
-  const handleSave = () => {
-    // In a real app, this would update the data source
-    // Redirect to /units after save
-    router.push("/units");
+  const handleSave = async () => {
+    try {
+      const { error } = await supabase
+        .from('units')
+        .update({
+          nama: formData.nama,
+          jenis: formData.jenis,
+          plat_nomor: formData.plat_nomor,
+          harga_sewa_per_hari: formData.harga_sewa_per_hari,
+          status: formData.status,
+          image_url: formData.image_url || null,
+        })
+        .eq('id', params.id);
+
+      if (error) throw error;
+      router.push("/units");
+    } catch (error) {
+      console.error('Error updating unit:', error);
+    }
   };
 
-  const handleDelete = () => {
-    // In a real app, this would delete from the data source
-    setShowDeleteDialog(false);
-    // Redirect to /units after delete
-    router.push("/units");
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('units')
+        .delete()
+        .eq('id', params.id);
+
+      if (error) throw error;
+      setShowDeleteDialog(false);
+      router.push("/units");
+    } catch (error) {
+      console.error('Error deleting unit:', error);
+    }
   };
 
   if (isLoading) {
@@ -98,11 +138,11 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
           {/* Left Column: Photo */}
           <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-4">
             <div className="relative w-full aspect-square rounded-lg overflow-hidden border bg-muted group">
-              {unit.imageUrl ? (
+              {unit.image_url ? (
                 <img
                   alt="Vehicle Photo"
                   className="w-full h-full object-cover"
-                  src={unit.imageUrl}
+                  src={unit.image_url}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
@@ -164,14 +204,14 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
 
               {/* Plat Nomor */}
               <div className="flex flex-col gap-2">
-                <label htmlFor="platNomor" className="text-sm font-medium text-muted-foreground">
+                <label htmlFor="plat_nomor" className="text-sm font-medium text-muted-foreground">
                   Plat Nomor
                 </label>
                 <input
-                  id="platNomor"
-                  name="platNomor"
+                  id="plat_nomor"
+                  name="plat_nomor"
                   type="text"
-                  value={formData.platNomor}
+                  value={formData.plat_nomor}
                   onChange={handleInputChange}
                   className="w-full bg-background border rounded-lg px-4 py-2 text-foreground uppercase focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
@@ -179,16 +219,16 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
 
               {/* Harga Sewa */}
               <div className="flex flex-col gap-2 md:col-span-2">
-                <label htmlFor="hargaSewaPerHari" className="text-sm font-medium text-muted-foreground">
+                <label htmlFor="harga_sewa_per_hari" className="text-sm font-medium text-muted-foreground">
                   Harga Sewa per Hari
                 </label>
                 <div className="relative flex items-center">
                   <span className="absolute left-4 text-muted-foreground">Rp</span>
                   <input
-                    id="hargaSewaPerHari"
-                    name="hargaSewaPerHari"
+                    id="harga_sewa_per_hari"
+                    name="harga_sewa_per_hari"
                     type="number"
-                    value={formData.hargaSewaPerHari}
+                    value={formData.harga_sewa_per_hari}
                     onChange={handleInputChange}
                     className="w-full bg-background border rounded-lg pl-12 pr-4 py-2 text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   />

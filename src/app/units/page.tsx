@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { mockUnits } from "@/lib/mock-data";
+import { supabase } from "@/lib/supabase";
+import { Unit, toCamelCase } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -11,8 +12,30 @@ import { SidebarLayout } from "@/components/layout/SidebarLayout";
 export default function UnitsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("terbaru");
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredUnits = mockUnits.filter((unit) =>
+  useEffect(() => {
+    fetchUnits();
+  }, []);
+
+  async function fetchUnits() {
+    try {
+      const { data, error } = await supabase
+        .from('units')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUnits(data || []);
+    } catch (error) {
+      console.error('Error fetching units:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const filteredUnits = units.filter((unit) =>
     unit.nama.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -22,9 +45,9 @@ export default function UnitsPage() {
     } else if (sortBy === "terlama") {
       return a.id.localeCompare(b.id);
     } else if (sortBy === "harga-tertinggi") {
-      return b.hargaSewaPerHari - a.hargaSewaPerHari;
+      return b.harga_sewa_per_hari - a.harga_sewa_per_hari;
     } else if (sortBy === "harga-terendah") {
-      return a.hargaSewaPerHari - b.hargaSewaPerHari;
+      return a.harga_sewa_per_hari - b.harga_sewa_per_hari;
     }
     return 0;
   });
@@ -81,7 +104,11 @@ export default function UnitsPage() {
       </div>
 
       {/* Vehicle Grid */}
-      {sortedUnits.length === 0 ? (
+      {loading ? (
+        <div className="text-center py-16">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      ) : sortedUnits.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-6xl mb-4">🚗</div>
           <h3 className="text-xl font-semibold text-foreground mb-2">Tidak ada unit ditemukan</h3>
@@ -101,7 +128,7 @@ export default function UnitsPage() {
   );
 }
 
-function UnitCard({ unit }: { unit: typeof mockUnits[0] }) {
+function UnitCard({ unit }: { unit: Unit }) {
   const isAvailable = unit.status === "tersedia";
   const statusBadgeClass = isAvailable
     ? "bg-green-100 text-green-800 border-green-200"
@@ -113,9 +140,9 @@ function UnitCard({ unit }: { unit: typeof mockUnits[0] }) {
     <div className="bg-card border rounded-lg overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-all group">
       {/* Image Area */}
       <div className="h-40 relative bg-muted overflow-hidden">
-        {unit.imageUrl ? (
+        {unit.image_url ? (
           <img
-            src={unit.imageUrl}
+            src={unit.image_url}
             alt={unit.nama}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -135,7 +162,7 @@ function UnitCard({ unit }: { unit: typeof mockUnits[0] }) {
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-semibold text-foreground">{unit.nama}</h3>
-            <p className="text-xs text-muted-foreground mt-1">{unit.platNomor}</p>
+            <p className="text-xs text-muted-foreground mt-1">{unit.plat_nomor}</p>
           </div>
           <span className="text-muted-foreground bg-muted p-1.5 rounded-md text-sm">
             {vehicleIcon === "two_wheeler" ? "🏍️" : "🚗"}
@@ -144,7 +171,7 @@ function UnitCard({ unit }: { unit: typeof mockUnits[0] }) {
 
         <div className="mt-auto pt-3 border-t border-border/50">
           <p className="font-bold text-primary">
-            Rp {unit.hargaSewaPerHari.toLocaleString("id-ID")}{" "}
+            Rp {unit.harga_sewa_per_hari.toLocaleString("id-ID")}{" "}
             <span className="text-muted-foreground font-normal text-sm">/ hari</span>
           </p>
         </div>

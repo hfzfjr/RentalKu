@@ -2,62 +2,64 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { mockPenyewaan, mockUnits, mockPenyewa, Penyewaan, Unit, Penyewa } from "@/lib/mock-data";
+import { supabase } from "@/lib/supabase";
+import { Rental, Unit, Tenant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 
 export default function RentalDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [rental, setRental] = useState<Penyewaan | null>(null);
+  const [rental, setRental] = useState<Rental | null>(null);
   const [unit, setUnit] = useState<Unit | null>(null);
-  const [tenant, setTenant] = useState<Penyewa | null>(null);
+  const [tenant, setTenant] = useState<Tenant | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [penyewaan, setPenyewaan] = useState<Penyewaan[]>([]);
 
   useEffect(() => {
-    // Load data from localStorage or mock data
-    const storedUnits = localStorage.getItem("mockUnits");
-    const storedTenants = localStorage.getItem("mockTenants");
-    const storedPenyewaan = localStorage.getItem("mockPenyewaan");
-
-    const unitsData = storedUnits ? JSON.parse(storedUnits) : mockUnits;
-    const tenantsData = storedTenants ? JSON.parse(storedTenants) : mockPenyewa;
-    const penyewaanData = storedPenyewaan ? JSON.parse(storedPenyewaan) : mockPenyewaan;
-
-    setUnits(unitsData);
-    setPenyewaan(penyewaanData);
-
-    // Find rental by ID
-    const foundRental = penyewaanData.find((r: Penyewaan) => r.id === params.id);
-    if (foundRental) {
-      setRental(foundRental);
-      const foundUnit = unitsData.find((u: Unit) => u.id === foundRental.unitId);
-      const foundTenant = tenantsData.find((t: Penyewa) => t.id === foundRental.penyewaId);
-      setUnit(foundUnit || null);
-      setTenant(foundTenant || null);
-    }
-    setIsLoading(false);
+    fetchRentalData();
   }, [params.id]);
 
-  const handleCompleteRental = () => {
+  async function fetchRentalData() {
+    try {
+      const [rentalData, unitsData, tenantsData] = await Promise.all([
+        supabase.from('rentals').select('*').eq('id', params.id).single(),
+        supabase.from('units').select('*'),
+        supabase.from('tenants').select('*'),
+      ]);
+
+      if (rentalData.error) throw rentalData.error;
+      if (unitsData.error) throw unitsData.error;
+      if (tenantsData.error) throw tenantsData.error;
+
+      if (rentalData.data) {
+        setRental(rentalData.data);
+        const foundUnit = unitsData.data?.find((u: Unit) => u.id === rentalData.data.unit_id);
+        const foundTenant = tenantsData.data?.find((t: Tenant) => t.id === rentalData.data.tenant_id);
+        setUnit(foundUnit || null);
+        setTenant(foundTenant || null);
+      }
+    } catch (error) {
+      console.error('Error fetching rental data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const handleCompleteRental = async () => {
     if (!rental || !unit) return;
 
-    // Update rental status to "selesai"
-    const updatedPenyewaan = penyewaan.map((r: Penyewaan) =>
-      r.id === rental.id ? { ...r, status: "selesai" as const } : r
-    );
-    localStorage.setItem("mockPenyewaan", JSON.stringify(updatedPenyewaan));
+    try {
+      const { error } = await supabase
+        .from('rentals')
+        .update({ status: 'selesai' })
+        .eq('id', rental.id);
 
-    // Update unit status back to "tersedia"
-    const updatedUnits = units.map((u: Unit) =>
-      u.id === unit.id ? { ...u, status: "tersedia" as const } : u
-    );
-    localStorage.setItem("mockUnits", JSON.stringify(updatedUnits));
-
-    setShowCompleteDialog(false);
-    router.push("/rentals");
+      if (error) throw error;
+      await fetchRentalData();
+      setShowCompleteDialog(false);
+    } catch (error) {
+      console.error('Error completing rental:', error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -67,15 +69,15 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
 
   const calculateDuration = () => {
     if (!rental) return 0;
-    const startDate = new Date(rental.tanggalMulai);
-    const endDate = new Date(rental.tanggalSelesai);
+    const startDate = new Date(rental.tanggal_mulai);
+    const endDate = new Date(rental.tanggal_selesai);
     return Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
   };
 
   const calculateTotalPrice = () => {
     if (!unit || !rental) return 0;
     const days = calculateDuration();
-    return days * unit.hargaSewaPerHari;
+    return days * unit.harga_sewa_per_hari;
   };
 
   const isCompleted = rental?.status === "selesai";
@@ -136,7 +138,7 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Plat Nomor</p>
-                <p className="font-medium text-foreground">{unit.platNomor}</p>
+                <p className="font-medium text-foreground">{unit.plat_nomor}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Jenis</p>
@@ -144,7 +146,7 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Harga Sewa/Hari</p>
-                <p className="font-medium text-foreground">Rp {unit.hargaSewaPerHari.toLocaleString("id-ID")}</p>
+                <p className="font-medium text-foreground">Rp {unit.harga_sewa_per_hari.toLocaleString("id-ID")}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Status Unit</p>
@@ -175,11 +177,11 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">No. HP</p>
-                <p className="font-medium text-foreground">{tenant.noHp}</p>
+                <p className="font-medium text-foreground">{tenant.no_hp}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">No. KTP</p>
-                <p className="font-mono text-sm text-foreground">{tenant.noKtp}</p>
+                <p className="font-mono text-sm text-foreground">{tenant.no_ktp}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Alamat</p>
@@ -196,11 +198,11 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Tanggal Mulai</p>
-                <p className="font-medium text-foreground">{formatDate(rental.tanggalMulai)}</p>
+                <p className="font-medium text-foreground">{formatDate(rental.tanggal_mulai)}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Tanggal Selesai</p>
-                <p className="font-medium text-foreground">{formatDate(rental.tanggalSelesai)}</p>
+                <p className="font-medium text-foreground">{formatDate(rental.tanggal_selesai)}</p>
               </div>
             </div>
             <div className="pt-4 border-t">
@@ -216,7 +218,7 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Harga Sewa/Hari</span>
-              <span className="font-mono text-foreground">Rp {unit.hargaSewaPerHari.toLocaleString("id-ID")}</span>
+              <span className="font-mono text-foreground">Rp {unit.harga_sewa_per_hari.toLocaleString("id-ID")}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Durasi</span>
