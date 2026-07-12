@@ -1,5 +1,6 @@
 export type UnitStatus = "tersedia" | "disewa";
 export type JenisKendaraan = "motor" | "mobil";
+export type PenyewaanStatus = "berlangsung" | "selesai";
 
 export interface Unit {
   id: string;
@@ -17,6 +18,15 @@ export interface Penyewa {
   noHp: string;
   alamat: string;
   noKtp: string;
+}
+
+export interface Penyewaan {
+  id: string;
+  unitId: string;
+  penyewaId: string;
+  tanggalMulai: string;
+  tanggalSelesai: string;
+  status: PenyewaanStatus;
 }
 
 export const mockUnits: Unit[] = [
@@ -75,5 +85,24 @@ export const mockPenyewa: Penyewa[] = [
     noHp: "083456789012",
     alamat: "Jl. Thamrin No. 15, Jakarta",
     noKtp: "3173456789010003",
+  },
+];
+
+export const mockPenyewaan: Penyewaan[] = [
+  {
+    id: "1",
+    unitId: "3",
+    penyewaId: "1",
+    tanggalMulai: "2023-10-12",
+    tanggalSelesai: "2023-10-15",
+    status: "selesai",
+  },
+  {
+    id: "2",
+    unitId: "1",
+    penyewaId: "2",
+    tanggalMulai: "2023-10-14",
+    tanggalSelesai: "2023-10-16",
+    status: "berlangsung",
   },
 ];
