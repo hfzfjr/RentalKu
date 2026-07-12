@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { mockPenyewaan, mockUnits, mockPenyewa, Penyewaan, Unit, Penyewa } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
+import { SidebarLayout } from "@/components/SidebarLayout";
 
 export default function RentalDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -82,45 +83,40 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <SidebarLayout
+        title="Detail Penyewaan"
+        description="Loading..."
+      >
         <p className="text-muted-foreground">Loading...</p>
-      </div>
+      </SidebarLayout>
     );
   }
 
   if (!rental || !unit || !tenant) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <SidebarLayout
+        title="Detail Penyewaan"
+        description="Transaksi tidak ditemukan"
+      >
         <h1 className="text-3xl font-bold mb-4">Transaksi tidak ditemukan</h1>
         <Button onClick={() => router.push("/rentals")}>Kembali</Button>
-      </div>
+      </SidebarLayout>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-background border-b px-4 py-4 flex items-center gap-4 mb-8">
-        <button
+    <SidebarLayout
+      title="Detail Penyewaan"
+      description="Lihat detail transaksi penyewaan kendaraan."
+      action={
+        <Button
+          variant="outline"
           onClick={() => router.push("/rentals")}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-lg p-2"
         >
-          <span className="text-xl">←</span>
-          <span className="text-sm font-medium">Kembali</span>
-        </button>
-        <div className="h-6 w-px bg-border mx-2"></div>
-        <h1 className="text-xl font-bold text-foreground hidden md:block">Detail Penyewaan</h1>
-        <h1 className="text-xl font-bold text-foreground md:hidden">Detail</h1>
-        <div className="ml-auto">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-            isCompleted
-              ? "bg-green-100 text-green-800"
-              : "bg-orange-100 text-orange-800"
-          }`}>
-            {isCompleted ? "Selesai" : "Berlangsung"}
-          </span>
-        </div>
-      </header>
+          Kembali
+        </Button>
+      }
+    >
 
       {/* Detail Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -152,11 +148,10 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Status Unit</p>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  unit.status === "tersedia"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-orange-100 text-orange-800"
-                }`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${unit.status === "tersedia"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-orange-100 text-orange-800"
+                  }`}>
                   {unit.status === "tersedia" ? "Tersedia" : "Disewa"}
                 </span>
               </div>
@@ -286,6 +281,6 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
           </div>
         </div>
       )}
-    </div>
+    </SidebarLayout>
   );
 }

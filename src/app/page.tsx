@@ -1,4 +1,7 @@
+"use client";
+
 import { mockUnits, mockPenyewa } from "@/lib/mock-data";
+import { SidebarLayout } from "@/components/SidebarLayout";
 
 export default function DashboardPage() {
   // Calculate stats from mock data
@@ -8,12 +11,10 @@ export default function DashboardPage() {
   const totalTenants = mockPenyewa.length;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Ringkasan aktivitas rental kendaraan Anda</p>
-      </div>
+    <SidebarLayout
+      title="Dashboard"
+      description="Ringkasan aktivitas rental kendaraan Anda"
+    >
 
       {/* Stat Cards Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -56,7 +57,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
-    </div>
+    </SidebarLayout>
   );
 }
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { mockUnits } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
+import { SidebarLayout } from "@/components/SidebarLayout";
 
 export default function UnitDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -48,14 +49,12 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
 
   const handleSave = () => {
     // In a real app, this would update the data source
-    console.log("Saving unit:", formData);
     // Redirect to /units after save
     router.push("/units");
   };
 
   const handleDelete = () => {
     // In a real app, this would delete from the data source
-    console.log("Deleting unit:", params.id);
     setShowDeleteDialog(false);
     // Redirect to /units after delete
     router.push("/units");
@@ -81,33 +80,18 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
   const isAvailable = formData.status === "tersedia";
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Top Bar */}
-      <header className="sticky top-0 z-10 bg-background border-b px-4 py-4 flex items-center gap-4 mb-8">
-        <button
+    <SidebarLayout
+      title="Detail Unit Kendaraan"
+      description="Edit detail unit kendaraan."
+      action={
+        <Button
+          variant="outline"
           onClick={() => router.push("/units")}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-lg p-2"
         >
-          <span className="text-xl">←</span>
-          <span className="text-sm font-medium">Kembali</span>
-        </button>
-        <div className="h-6 w-px bg-border mx-2"></div>
-        <h1 className="text-xl font-bold text-foreground hidden md:block">Detail Unit Kendaraan</h1>
-        <h1 className="text-xl font-bold text-foreground md:hidden">Detail Unit</h1>
-        <div className="ml-auto flex items-center gap-2">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-2 ${
-              isAvailable
-                ? "bg-green-100 text-green-800"
-                : "bg-orange-100 text-orange-800"
-            }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${isAvailable ? "bg-green-600" : "bg-orange-600"}`}></span>
-            {isAvailable ? "Tersedia" : "Disewa"}
-          </span>
-        </div>
-      </header>
-
+          Kembali
+        </Button>
+      }
+    >
       {/* Form Area */}
       <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
         <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
@@ -220,22 +204,20 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
                   <button
                     type="button"
                     onClick={() => handleStatusChange("tersedia")}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-                      isAvailable
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${isAvailable
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     Tersedia
                   </button>
                   <button
                     type="button"
                     onClick={() => handleStatusChange("disewa")}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-                      !isAvailable
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${!isAvailable
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     Disewa
                   </button>
@@ -303,6 +285,6 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       )}
-    </div>
+    </SidebarLayout>
   );
 }

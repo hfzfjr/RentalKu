@@ -1,19 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { mockPenyewaan, mockUnits, mockPenyewa } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
+import { SidebarLayout } from "@/components/SidebarLayout";
 
 type StatusFilter = "semua" | "berlangsung" | "selesai";
 
 export default function RentalsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("semua");
+  const [penyewaan, setPenyewaan] = useState(mockPenyewaan);
+  const [units, setUnits] = useState(mockUnits);
+  const [tenants, setTenants] = useState(mockPenyewa);
+
+  // Load data from localStorage or mock data
+  useEffect(() => {
+    const storedUnits = localStorage.getItem("mockUnits");
+    const storedTenants = localStorage.getItem("mockTenants");
+    const storedPenyewaan = localStorage.getItem("mockPenyewaan");
+
+    setUnits(storedUnits ? JSON.parse(storedUnits) : mockUnits);
+    setTenants(storedTenants ? JSON.parse(storedTenants) : mockPenyewa);
+    setPenyewaan(storedPenyewaan ? JSON.parse(storedPenyewaan) : mockPenyewaan);
+  }, []);
 
   // Join penyewaan with unit and penyewa data
-  const rentalsWithDetails = mockPenyewaan.map((penyewaan) => {
-    const unit = mockUnits.find((u) => u.id === penyewaan.unitId);
-    const penyewa = mockPenyewa.find((p) => p.id === penyewaan.penyewaId);
+  const rentalsWithDetails = penyewaan.map((penyewaan) => {
+    const unit = units.find((u) => u.id === penyewaan.unitId);
+    const penyewa = tenants.find((p) => p.id === penyewaan.penyewaId);
 
     // Calculate total price based on rental duration
     const startDate = new Date(penyewaan.tanggalMulai);
@@ -62,19 +77,17 @@ export default function RentalsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-foreground">Penyewaan</h1>
-          <p className="text-muted-foreground mt-1">Kelola semua transaksi penyewaan kendaraan Anda.</p>
-        </div>
+    <SidebarLayout
+      title="Penyewaan"
+      description="Kelola semua transaksi penyewaan kendaraan Anda."
+      action={
         <Link href="/rentals/new">
           <Button className="whitespace-nowrap">
             + Buat Penyewaan Baru
           </Button>
         </Link>
-      </div>
+      }
+    >
 
       {/* Status Filters */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-4 mb-6">
@@ -246,6 +259,6 @@ export default function RentalsPage() {
           </div>
         </div>
       )}
-    </div>
+    </SidebarLayout>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { SidebarLayout } from "@/components/SidebarLayout";
 
 export default function NewUnitPage() {
   const router = useRouter();
@@ -39,9 +40,6 @@ export default function NewUnitPage() {
       ...formData,
     };
 
-    // In a real app, this would save to a database
-    console.log("Adding new unit:", newUnit);
-    
     // For now, we'll store in localStorage to persist across page reloads
     const existingUnits = JSON.parse(localStorage.getItem("mockUnits") || "[]");
     const updatedUnits = [...existingUnits, newUnit];
@@ -54,21 +52,18 @@ export default function NewUnitPage() {
   const isAvailable = formData.status === "tersedia";
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Top Bar */}
-      <header className="sticky top-0 z-10 bg-background border-b px-4 py-4 flex items-center gap-4 mb-8">
-        <button
+    <SidebarLayout
+      title="Tambah Unit Kendaraan"
+      description="Tambah unit kendaraan baru ke dalam sistem."
+      action={
+        <Button
+          variant="outline"
           onClick={() => router.push("/units")}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-lg p-2"
         >
-          <span className="text-xl">←</span>
-          <span className="text-sm font-medium">Kembali</span>
-        </button>
-        <div className="h-6 w-px bg-border mx-2"></div>
-        <h1 className="text-xl font-bold text-foreground hidden md:block">Tambah Unit Kendaraan</h1>
-        <h1 className="text-xl font-bold text-foreground md:hidden">Tambah Unit</h1>
-      </header>
-
+          Kembali
+        </Button>
+      }
+    >
       {/* Form Area */}
       <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
         <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
@@ -177,22 +172,20 @@ export default function NewUnitPage() {
                   <button
                     type="button"
                     onClick={() => handleStatusChange("tersedia")}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-                      isAvailable
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${isAvailable
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     Tersedia
                   </button>
                   <button
                     type="button"
                     onClick={() => handleStatusChange("disewa")}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-                      !isAvailable
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${!isAvailable
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     Disewa
                   </button>
@@ -224,6 +217,6 @@ export default function NewUnitPage() {
           </div>
         </div>
       </div>
-    </div>
+    </SidebarLayout>
   );
 }

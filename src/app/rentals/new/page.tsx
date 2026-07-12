@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { mockUnits, mockPenyewa, mockPenyewaan, Unit, Penyewa, Penyewaan } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
+import { SidebarLayout } from "@/components/SidebarLayout";
 
 export default function NewRentalPage() {
   const router = useRouter();
@@ -91,26 +92,18 @@ export default function NewRentalPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
-      <header className="w-full bg-card border-b sticky top-0 z-40 mb-8">
-        <div className="flex items-center justify-between py-4">
-          <button
-            onClick={() => router.push("/rentals")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <span className="text-xl">←</span>
-            <span className="text-sm font-medium">Kembali</span>
-          </button>
-          <div className="font-bold text-foreground">RentalKu</div>
-        </div>
-      </header>
-
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">Buat Penyewaan Baru</h1>
-        <p className="text-muted-foreground">Lengkapi form di bawah ini untuk mencatat transaksi penyewaan baru.</p>
-      </div>
+    <SidebarLayout
+      title="Buat Penyewaan Baru"
+      description="Lengkapi form di bawah ini untuk mencatat transaksi penyewaan baru."
+      action={
+        <Button
+          variant="outline"
+          onClick={() => router.push("/rentals")}
+        >
+          Kembali
+        </Button>
+      }
+    >
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -323,6 +316,6 @@ export default function NewRentalPage() {
           </div>
         </div>
       </div>
-    </div>
+    </SidebarLayout>
   );
 }

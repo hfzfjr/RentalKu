@@ -4,6 +4,7 @@ import { useState } from "react";
 import { mockPenyewa, Penyewa } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { TenantDialog } from "@/components/TenantDialog";
+import { SidebarLayout } from "@/components/SidebarLayout";
 
 export default function TenantsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,17 +72,15 @@ export default function TenantsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-foreground">Data Penyewa</h1>
-          <p className="text-muted-foreground mt-1">Kelola data penyewa kendaraan.</p>
-        </div>
-        <Button onClick={handleOpenAddDialog} className="hidden md:flex">
+    <SidebarLayout
+      title="Data Penyewa"
+      description="Kelola data penyewa kendaraan."
+      action={
+        <Button onClick={handleOpenAddDialog}>
           + Tambah Penyewa
         </Button>
-      </div>
+      }
+    >
 
       {/* Search Bar */}
       <div className="mb-8">
@@ -281,6 +280,6 @@ export default function TenantsPage() {
           </div>
         </div>
       )}
-    </div>
+    </SidebarLayout>
   );
 }

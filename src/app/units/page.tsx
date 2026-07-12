@@ -3,22 +3,21 @@
 import Link from "next/link";
 import { mockUnits } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
+import { SidebarLayout } from "@/components/SidebarLayout";
 
 export default function UnitsPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-foreground">Unit Kendaraan</h1>
-          <p className="text-muted-foreground mt-1">Kelola semua daftar kendaraan yang tersedia untuk disewakan.</p>
-        </div>
+    <SidebarLayout
+      title="Unit Kendaraan"
+      description="Kelola semua daftar kendaraan yang tersedia untuk disewakan."
+      action={
         <Link href="/units/new">
-          <Button className="hidden md:flex">
+          <Button>
             + Tambah Unit
           </Button>
         </Link>
-      </div>
+      }
+    >
 
       {/* Filters & Search */}
       <div className="bg-card border rounded-xl p-4 mb-8 shadow-sm">
@@ -67,7 +66,7 @@ export default function UnitsPage() {
           ))}
         </div>
       )}
-    </div>
+    </SidebarLayout>
   );
 }
 
