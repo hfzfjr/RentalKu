@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { mockPenyewaan, mockUnits, mockPenyewa } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
-import { SidebarLayout } from "@/components/SidebarLayout";
+import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type StatusFilter = "semua" | "berlangsung" | "selesai";
 
@@ -90,31 +91,14 @@ export default function RentalsPage() {
     >
 
       {/* Status Filters */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-border pb-4 mb-6">
-        <Button
-          variant={statusFilter === "semua" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setStatusFilter("semua")}
-          className="rounded-full"
-        >
-          Semua
-        </Button>
-        <Button
-          variant={statusFilter === "berlangsung" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setStatusFilter("berlangsung")}
-          className="rounded-full"
-        >
-          Berlangsung
-        </Button>
-        <Button
-          variant={statusFilter === "selesai" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setStatusFilter("selesai")}
-          className="rounded-full"
-        >
-          Selesai
-        </Button>
+      <div className="border-b border-border pb-4 mb-6">
+        <Tabs value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
+          <TabsList>
+            <TabsTrigger value="semua">Semua</TabsTrigger>
+            <TabsTrigger value="berlangsung">Berlangsung</TabsTrigger>
+            <TabsTrigger value="selesai">Selesai</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Data Table / Cards */}

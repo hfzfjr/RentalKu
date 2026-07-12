@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { mockUnits } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
-import { SidebarLayout } from "@/components/SidebarLayout";
+import { SidebarLayout } from "@/components/layout/SidebarLayout";
 
 export default function UnitDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();

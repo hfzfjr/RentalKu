@@ -1,11 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { mockUnits } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
-import { SidebarLayout } from "@/components/SidebarLayout";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { SidebarLayout } from "@/components/layout/SidebarLayout";
 
 export default function UnitsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("terbaru");
+
+  const filteredUnits = mockUnits.filter((unit) =>
+    unit.nama.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const sortedUnits = [...filteredUnits].sort((a, b) => {
+    if (sortBy === "terbaru") {
+      return b.id.localeCompare(a.id);
+    } else if (sortBy === "terlama") {
+      return a.id.localeCompare(b.id);
+    } else if (sortBy === "harga-tertinggi") {
+      return b.hargaSewaPerHari - a.hargaSewaPerHari;
+    } else if (sortBy === "harga-terendah") {
+      return a.hargaSewaPerHari - b.hargaSewaPerHari;
+    }
+    return 0;
+  });
+
   return (
     <SidebarLayout
       title="Unit Kendaraan"
@@ -22,14 +45,15 @@ export default function UnitsPage() {
       {/* Filters & Search */}
       <div className="bg-card border rounded-xl p-4 mb-8 shadow-sm">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <div className="w-full md:hidden relative">
-            <input
-              className="w-full pl-10 pr-4 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+          <div className="flex-1 w-full">
+            <Input
               placeholder="Cari nama unit..."
-              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="max-w-md"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto w-full pb-2 md:pb-0">
+          <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
             <Button variant="default" size="sm" className="rounded-full">
               Semua
             </Button>
@@ -39,29 +63,36 @@ export default function UnitsPage() {
             <Button variant="outline" size="sm" className="rounded-full">
               Disewa
             </Button>
-            <Button variant="outline" size="sm" className="rounded-full">
-              Filter
-            </Button>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
-            Urutkan: <span className="font-semibold text-foreground cursor-pointer">Terbaru ▼</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-sm text-muted-foreground">Urutkan:</span>
+            <Select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-40"
+            >
+              <option value="terbaru">Terbaru</option>
+              <option value="terlama">Terlama</option>
+              <option value="harga-tertinggi">Harga Tertinggi</option>
+              <option value="harga-terendah">Harga Terendah</option>
+            </Select>
           </div>
         </div>
       </div>
 
       {/* Vehicle Grid */}
-      {mockUnits.length === 0 ? (
+      {sortedUnits.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-6xl mb-4">🚗</div>
-          <h3 className="text-xl font-semibold text-foreground mb-2">Belum ada unit kendaraan</h3>
-          <p className="text-muted-foreground mb-6">Mulai dengan menambahkan unit kendaraan pertama Anda.</p>
-          <Link href="/units/new">
-            <Button>+ Tambah Unit</Button>
-          </Link>
+          <h3 className="text-xl font-semibold text-foreground mb-2">Tidak ada unit ditemukan</h3>
+          <p className="text-muted-foreground mb-6">Coba ubah kata kunci pencarian atau filter.</p>
+          <Button onClick={() => { setSearchQuery(""); setSortBy("terbaru"); }}>
+            Reset Filter
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {mockUnits.map((unit) => (
+          {sortedUnits.map((unit) => (
             <UnitCard key={unit.id} unit={unit} />
           ))}
         </div>

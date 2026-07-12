@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { mockPenyewa, Penyewa } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
-import { TenantDialog } from "@/components/TenantDialog";
-import { SidebarLayout } from "@/components/SidebarLayout";
+import { TenantDialog } from "@/components/tenants/TenantDialog";
+import { SidebarLayout } from "@/components/layout/SidebarLayout";
 
 export default function TenantsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,11 +13,23 @@ export default function TenantsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [tenantToDelete, setTenantToDelete] = useState<Penyewa | undefined>(undefined);
   const [tenants, setTenants] = useState(mockPenyewa);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const filteredTenants = tenants.filter((tenant) =>
     tenant.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tenant.noHp.includes(searchQuery)
   );
+
+  const totalPages = Math.ceil(filteredTenants.length / itemsPerPage);
+  const paginatedTenants = filteredTenants.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const getInitials = (name: string) => {
     return name.charAt(0).toUpperCase();
@@ -70,6 +82,11 @@ export default function TenantsPage() {
       setTenantToDelete(undefined);
     }
   };
+
+  // Reset page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   return (
     <SidebarLayout
@@ -139,7 +156,7 @@ export default function TenantsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {filteredTenants.map((tenant, index) => (
+                {paginatedTenants.map((tenant, index) => (
                   <tr key={tenant.id} className="hover:bg-muted/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -178,7 +195,7 @@ export default function TenantsPage() {
 
           {/* Mobile Card View */}
           <div className="md:hidden flex flex-col divide-y">
-            {filteredTenants.map((tenant, index) => (
+            {paginatedTenants.map((tenant, index) => (
               <div key={tenant.id} className="p-4 hover:bg-muted/50 transition-colors">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-3">
@@ -223,14 +240,24 @@ export default function TenantsPage() {
           {/* Pagination Footer */}
           <div className="bg-muted border-t px-6 py-3 flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
-              Menampilkan {filteredTenants.length} dari {tenants.length} data
+              Menampilkan {paginatedTenants.length} dari {filteredTenants.length} data
             </span>
             <div className="flex items-center gap-2">
-              <button className="p-2 rounded text-muted-foreground hover:bg-muted disabled:opacity-50" disabled>
+              <button
+                className="p-2 rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
                 ←
               </button>
-              <span className="text-sm text-foreground">1 / 1</span>
-              <button className="p-2 rounded text-muted-foreground hover:bg-muted disabled:opacity-50" disabled>
+              <span className="text-sm text-foreground">
+                {currentPage} / {totalPages || 1}
+              </span>
+              <button
+                className="p-2 rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || totalPages === 0}
+              >
                 →
               </button>
             </div>

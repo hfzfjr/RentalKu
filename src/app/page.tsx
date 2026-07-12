@@ -1,7 +1,8 @@
 "use client";
 
 import { mockUnits, mockPenyewa } from "@/lib/mock-data";
-import { SidebarLayout } from "@/components/SidebarLayout";
+import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { Icons } from "@/components/icons";
 
 export default function DashboardPage() {
   // Calculate stats from mock data
@@ -21,22 +22,22 @@ export default function DashboardPage() {
         <StatCard
           title="Total Unit"
           value={totalUnits}
-          icon="🚗"
+          icon={<Icons.Car className="text-2xl" />}
         />
         <StatCard
           title="Unit Tersedia"
           value={availableUnits}
-          icon="✅"
+          icon={<Icons.CheckSquare className="text-2xl" />}
         />
         <StatCard
           title="Unit Disewa"
           value={rentedUnits}
-          icon="🛒"
+          icon={<Icons.ShoppingCart className="text-2xl" />}
         />
         <StatCard
           title="Total Penyewa"
           value={totalTenants}
-          icon="👥"
+          icon={<Icons.People className="text-2xl" />}
         />
       </section>
 
@@ -51,7 +52,9 @@ export default function DashboardPage() {
         <div className="p-6">
           {/* Empty State - No rental data yet */}
           <div className="text-center py-12">
-            <div className="text-5xl mb-4">📋</div>
+            <div className="text-5xl mb-4 text-primary">
+              <Icons.ClipboardDocumentList className="w-16 h-16 mx-auto" />
+            </div>
             <h3 className="text-lg font-semibold text-foreground mb-2">Belum ada transaksi penyewaan</h3>
             <p className="text-muted-foreground">Data penyewaan akan muncul di sini setelah Anda membuat transaksi penyewaan.</p>
           </div>
@@ -61,7 +64,7 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({ title, value, icon }: { title: string; value: number; icon: string }) {
+function StatCard({ title, value, icon }: { title: string; value: number; icon: React.ReactNode }) {
   return (
     <div className="bg-card border rounded-lg p-6 shadow-sm hover:shadow-md transition-all">
       <div className="flex justify-between items-start">
@@ -71,7 +74,7 @@ function StatCard({ title, value, icon }: { title: string; value: number; icon: 
           </p>
           <h3 className="text-2xl font-bold text-foreground">{value}</h3>
         </div>
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
           {icon}
         </div>
       </div>

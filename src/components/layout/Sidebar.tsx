@@ -2,18 +2,19 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { Icons } from "@/components/icons";
 
 interface NavItem {
   label: string;
   href: string;
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/", icon: "📊" },
-  { label: "Unit Kendaraan", href: "/units", icon: "🚗" },
-  { label: "Data Penyewa", href: "/tenants", icon: "👥" },
-  { label: "Penyewaan", href: "/rentals", icon: "📋" },
+  { label: "Dashboard", href: "/", icon: Icons.Dashboard },
+  { label: "Unit Kendaraan", href: "/units", icon: Icons.Car },
+  { label: "Data Penyewa", href: "/tenants", icon: Icons.People },
+  { label: "Penyewaan", href: "/rentals", icon: Icons.Receipt },
 ];
 
 interface SidebarProps {
@@ -40,10 +41,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           }`}
       >
         {/* Logo Section */}
-        <div className="p-6 border-b border-border flex items-center justify-between">
+        <div className="py-3 px-6 border-b border-border flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">RentalKu</h1>
-            <p className="text-sm text-muted-foreground mt-1">Manajemen Rental Kendaraan</p>
+            <img
+              src="/logo-tulisan.png"
+              alt="RentalKu"
+              className="w-50 h-auto"
+            />
           </div>
           <button
             onClick={onClose}
@@ -64,23 +68,16 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 href={item.href}
                 onClick={() => onClose()}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
               >
-                <span className="text-lg">{item.icon}</span>
+                <item.icon className="text-lg" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-border">
-          <p className="text-xs text-muted-foreground text-center">
-            © 2024 RentalKu
-          </p>
-        </div>
       </aside>
     </>
   );
