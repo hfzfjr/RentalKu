@@ -8,10 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { Icons } from "@/components/icons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function UnitsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("terbaru");
+  const [vehicleTypeFilter, setVehicleTypeFilter] = useState<"semua" | "mobil" | "motor">("semua");
+  const [statusFilter, setStatusFilter] = useState<"semua" | "tersedia" | "disewa">("semua");
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,15 +39,18 @@ export default function UnitsPage() {
     }
   }
 
-  const filteredUnits = units.filter((unit) =>
-    unit.nama.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUnits = units.filter((unit) => {
+    const matchesSearch = unit.nama.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesVehicleType = vehicleTypeFilter === "semua" || unit.jenis === vehicleTypeFilter;
+    const matchesStatus = statusFilter === "semua" || unit.status === statusFilter;
+    return matchesSearch && matchesVehicleType && matchesStatus;
+  });
 
   const sortedUnits = [...filteredUnits].sort((a, b) => {
     if (sortBy === "terbaru") {
-      return b.id.localeCompare(a.id);
+      return b.tahun_produksi - a.tahun_produksi;
     } else if (sortBy === "terlama") {
-      return a.id.localeCompare(b.id);
+      return a.tahun_produksi - b.tahun_produksi;
     } else if (sortBy === "harga-tertinggi") {
       return b.harga_sewa_per_hari - a.harga_sewa_per_hari;
     } else if (sortBy === "harga-terendah") {
@@ -59,61 +66,129 @@ export default function UnitsPage() {
       action={
         <Link href="/units/new">
           <Button>
-            + Tambah Unit
+            <Icons.Plus />Tambah Unit
           </Button>
         </Link>
       }
     >
 
       {/* Filters & Search */}
-      <div className="bg-card border rounded-xl p-4 mb-8 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <div className="flex-1 w-full">
+      <div className="bg-card border rounded-xl p-6 mb-8 shadow-sm">
+        <div className="space-y-4">
+          {/* Search Bar */}
+          <div className="flex-1">
             <Input
               placeholder="Cari nama unit..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-md"
+              className="w-full"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
-            <Button variant="default" size="sm" className="rounded-full">
-              Semua
-            </Button>
-            <Button variant="outline" size="sm" className="rounded-full">
-              Tersedia
-            </Button>
-            <Button variant="outline" size="sm" className="rounded-full">
-              Disewa
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-sm text-muted-foreground">Urutkan:</span>
-            <Select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-40"
-            >
-              <option value="terbaru">Terbaru</option>
-              <option value="terlama">Terlama</option>
-              <option value="harga-tertinggi">Harga Tertinggi</option>
-              <option value="harga-terendah">Harga Terendah</option>
-            </Select>
+
+          {/* Filter Groups */}
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Vehicle Type Filter */}
+            <div className="flex-1">
+              <div className="text-sm font-medium text-foreground mb-3">Jenis Kendaraan</div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={vehicleTypeFilter === "semua" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setVehicleTypeFilter("semua")}
+                  className="rounded-full"
+                >
+                  Semua
+                </Button>
+                <Button
+                  variant={vehicleTypeFilter === "mobil" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setVehicleTypeFilter("mobil")}
+                  className="rounded-full"
+                >
+                  Mobil
+                </Button>
+                <Button
+                  variant={vehicleTypeFilter === "motor" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setVehicleTypeFilter("motor")}
+                  className="rounded-full"
+                >
+                  Motor
+                </Button>
+              </div>
+            </div>
+
+            {/* Status Filter */}
+            <div className="flex-1">
+              <div className="text-sm font-medium text-foreground mb-3">Status Ketersediaan</div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={statusFilter === "semua" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStatusFilter("semua")}
+                  className="rounded-full"
+                >
+                  Semua
+                </Button>
+                <Button
+                  variant={statusFilter === "tersedia" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStatusFilter("tersedia")}
+                  className="rounded-full"
+                >
+                  Tersedia
+                </Button>
+                <Button
+                  variant={statusFilter === "disewa" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStatusFilter("disewa")}
+                  className="rounded-full"
+                >
+                  Disewa
+                </Button>
+              </div>
+            </div>
+
+            {/* Sort */}
+            <div className="lg:w-48">
+              <div className="text-sm font-medium text-foreground mb-3">Urutkan</div>
+              <Select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full"
+              >
+                <option value="terbaru">Terbaru</option>
+                <option value="terlama">Terlama</option>
+                <option value="harga-tertinggi">Harga Tertinggi</option>
+                <option value="harga-terendah">Harga Terendah</option>
+              </Select>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Vehicle Grid */}
       {loading ? (
-        <div className="text-center py-16">
-          <p className="text-muted-foreground">Loading...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="bg-card border rounded-lg overflow-hidden flex flex-col">
+              <Skeleton className="h-40 w-full" />
+              <div className="p-4 flex flex-col gap-2 flex-1">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <div className="mt-auto pt-3 border-t border-border/50">
+                  <Skeleton className="h-5 w-1/3" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : sortedUnits.length === 0 ? (
         <div className="text-center py-16">
-          <div className="text-6xl mb-4">🚗</div>
+          <Icons.NoData className="text-6xl mb-4 mx-auto text-muted-foreground" />
           <h3 className="text-xl font-semibold text-foreground mb-2">Tidak ada unit ditemukan</h3>
           <p className="text-muted-foreground mb-6">Coba ubah kata kunci pencarian atau filter.</p>
-          <Button onClick={() => { setSearchQuery(""); setSortBy("terbaru"); }}>
+          <Button onClick={() => { setSearchQuery(""); setVehicleTypeFilter("semua"); setStatusFilter("semua"); setSortBy("terbaru"); }}>
             Reset Filter
           </Button>
         </div>
@@ -148,7 +223,7 @@ function UnitCard({ unit }: { unit: Unit }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted">
-            <span className="text-4xl text-muted-foreground">🚗</span>
+            <Icons.Car className="text-4xl text-muted-foreground" />
           </div>
         )}
         <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 border ${statusBadgeClass}`}>
@@ -162,10 +237,10 @@ function UnitCard({ unit }: { unit: Unit }) {
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-semibold text-foreground">{unit.nama}</h3>
-            <p className="text-xs text-muted-foreground mt-1">{unit.plat_nomor}</p>
+            <p className="text-xs text-muted-foreground mt-1">{unit.tahun_produksi}</p>
           </div>
           <span className="text-muted-foreground bg-muted p-1.5 rounded-md text-sm">
-            {vehicleIcon === "two_wheeler" ? "🏍️" : "🚗"}
+            {vehicleIcon === "two_wheeler" ? <Icons.Motorcycle className="text-sm" /> : <Icons.Car className="text-sm" />}
           </span>
         </div>
 

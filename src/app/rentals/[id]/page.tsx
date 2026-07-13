@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import { Rental, Unit, Tenant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { Icons } from "@/components/icons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RentalDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -89,7 +91,22 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
         title="Detail Penyewaan"
         description="Loading..."
       >
-        <p className="text-muted-foreground">Loading...</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-card border rounded-lg p-6 shadow-sm space-y-4">
+            <Skeleton className="h-6 w-32" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+          <div className="bg-card border rounded-lg p-6 shadow-sm space-y-4">
+            <Skeleton className="h-6 w-32" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+        </div>
       </SidebarLayout>
     );
   }
@@ -128,7 +145,7 @@ export default function RentalDetailPage({ params }: { params: { id: string } })
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-2xl">
-                🚗
+                <Icons.Car className="w-8 h-8" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Nama Kendaraan</p>

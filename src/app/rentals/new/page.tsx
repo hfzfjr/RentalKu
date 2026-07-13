@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import { Unit, Tenant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { Icons } from "@/components/icons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function NewRentalPage() {
   const router = useRouter();
@@ -111,6 +113,40 @@ export default function NewRentalPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <SidebarLayout
+        title="Buat Penyewaan Baru"
+        description="Loading..."
+        action={
+          <Button
+            variant="outline"
+            onClick={() => router.push("/rentals")}
+          >
+            Kembali
+          </Button>
+        }
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-8 bg-card border rounded-lg p-6 shadow-sm space-y-6">
+            <Skeleton className="h-6 w-48" />
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
+          <div className="lg:col-span-4 bg-card border rounded-lg p-6 shadow-sm">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-4">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
+        </div>
+      </SidebarLayout>
+    );
+  }
+
   return (
     <SidebarLayout
       title="Buat Penyewaan Baru"
@@ -143,7 +179,7 @@ export default function NewRentalPage() {
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      🚗
+                      <Icons.Car className="w-4 h-4" />
                     </span>
                     <select
                       id="unit_id"
@@ -284,7 +320,7 @@ export default function NewRentalPage() {
               {/* Unit Details */}
               <div className="bg-muted p-4 rounded-md flex items-center gap-4">
                 <div className="w-12 h-12 bg-primary/10 rounded flex items-center justify-center text-primary">
-                  🚗
+                  <Icons.Car className="w-6 h-6" />
                 </div>
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">Unit Terpilih</p>

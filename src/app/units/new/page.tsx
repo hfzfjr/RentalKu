@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { Icons } from "@/components/icons";
 
 export default function NewUnitPage() {
   const router = useRouter();
@@ -78,11 +79,11 @@ export default function NewUnitPage() {
           <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-4">
             <div className="relative w-full aspect-square rounded-lg overflow-hidden border bg-muted group">
               <div className="w-full h-full flex items-center justify-center bg-muted">
-                <span className="text-6xl text-muted-foreground">🚗</span>
+                <Icons.Car className="text-6xl text-muted-foreground" />
               </div>
               {/* Overlay for upload */}
               <div className="absolute inset-0 bg-foreground/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button className="bg-background text-primary px-4 py-2 rounded-lg shadow-sm hover:bg-muted transition-colors flex items-center gap-2 text-sm font-medium">
+                <button className="bg-background text-primary px-4 py-2 rounded-lg shadow-sm hover:bg-muted transition-colors flex items-center gap-2 text-sm font-medium cursor-pointer">
                   <span>📷</span>
                   Upload Foto
                 </button>
@@ -179,7 +180,7 @@ export default function NewUnitPage() {
                   <button
                     type="button"
                     onClick={() => handleStatusChange("tersedia")}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${isAvailable
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${isAvailable
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                       }`}
@@ -189,7 +190,7 @@ export default function NewUnitPage() {
                   <button
                     type="button"
                     onClick={() => handleStatusChange("disewa")}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${!isAvailable
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${!isAvailable
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                       }`}
@@ -216,7 +217,6 @@ export default function NewUnitPage() {
                   onClick={handleSubmit}
                   className="w-full sm:w-auto"
                 >
-                  <span className="mr-2">💾</span>
                   Simpan Unit
                 </Button>
               </div>

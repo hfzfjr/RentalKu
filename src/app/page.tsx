@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Unit, Tenant, Rental } from "@/lib/types";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { Icons } from "@/components/icons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
   const [units, setUnits] = useState<Unit[]>([]);
@@ -50,7 +52,29 @@ export default function DashboardPage() {
       description="Ringkasan aktivitas rental kendaraan Anda"
     >
       {loading ? (
-        <p className="text-muted-foreground">Loading...</p>
+        <>
+          {/* Stat Cards Grid */}
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-card border rounded-lg p-6 shadow-sm">
+                <Skeleton className="h-5 w-24 mb-2" />
+                <Skeleton className="h-8 w-16" />
+              </div>
+            ))}
+          </section>
+          {/* Recent Rentals */}
+          <section className="bg-card border rounded-lg p-6 shadow-sm">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-muted rounded">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              ))}
+            </div>
+          </section>
+        </>
       ) : (
         <>
           {/* Stat Cards Grid */}
@@ -81,9 +105,9 @@ export default function DashboardPage() {
           <section className="bg-card border rounded-lg shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b flex justify-between items-center">
               <h3 className="text-lg font-semibold text-foreground">Penyewaan Terbaru</h3>
-              <button className="text-primary text-sm hover:underline flex items-center gap-1">
-                Lihat Semua →
-              </button>
+              <Link href="/rentals" className="text-primary text-sm hover:underline flex items-center gap-1 cursor-pointer">
+                Lihat Semua <Icons.RightArrow className="w-4 h-4" />
+              </Link>
             </div>
             <div className="p-6">
               {rentals.length === 0 ? (
@@ -111,8 +135,8 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${rental.status === "selesai"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-orange-100 text-orange-800"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-orange-100 text-orange-800"
                           }`}>
                           {rental.status === "selesai" ? "Selesai" : "Berlangsung"}
                         </span>

@@ -12,6 +12,7 @@ export interface Unit {
   image_url: string | null;
   created_at: string;
   updated_at: string;
+  tahun_produksi: number;
 }
 
 export interface Tenant {
@@ -39,11 +40,11 @@ export interface Rental {
 // Helper to convert database row to camelCase (for UI)
 export function toCamelCase<T>(obj: any): T {
   if (obj === null || typeof obj !== 'object') return obj;
-  
+
   if (Array.isArray(obj)) {
     return obj.map(item => toCamelCase<T>(item)) as T;
   }
-  
+
   const result: any = {};
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
@@ -57,11 +58,11 @@ export function toCamelCase<T>(obj: any): T {
 // Helper to convert camelCase to snake_case (for database)
 export function toSnakeCase<T>(obj: any): T {
   if (obj === null || typeof obj !== 'object') return obj;
-  
+
   if (Array.isArray(obj)) {
     return obj.map(item => toSnakeCase<T>(item)) as T;
   }
-  
+
   const result: any = {};
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {

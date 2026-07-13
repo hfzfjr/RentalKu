@@ -43,6 +43,7 @@ next-env.d.ts
 .devin
 tasks
 docs
+*.sql
 
 AGENTS.md
 CLAUDE.md

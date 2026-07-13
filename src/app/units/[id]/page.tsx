@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import { Unit } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { Icons } from "@/components/icons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function UnitDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -102,9 +104,26 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
+      <SidebarLayout
+        title="Detail Unit Kendaraan"
+        description="Loading..."
+      >
+        <div className="bg-card border rounded-lg p-6 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-1/3" />
+              <Skeleton className="h-6 w-1/4" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-40 w-full" />
+            </div>
+          </div>
+        </div>
+      </SidebarLayout>
     );
   }
 
@@ -146,12 +165,12 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <span className="text-6xl text-muted-foreground">🚗</span>
+                  <Icons.Car className="text-6xl text-muted-foreground" />
                 </div>
               )}
               {/* Overlay for edit */}
               <div className="absolute inset-0 bg-foreground/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button className="bg-background text-primary px-4 py-2 rounded-lg shadow-sm hover:bg-muted transition-colors flex items-center gap-2 text-sm font-medium">
+                <button className="bg-background text-primary px-4 py-2 rounded-lg shadow-sm hover:bg-muted transition-colors flex items-center gap-2 text-sm font-medium cursor-pointer">
                   <span>📷</span>
                   Ganti Foto
                 </button>
@@ -244,7 +263,7 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
                   <button
                     type="button"
                     onClick={() => handleStatusChange("tersedia")}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${isAvailable
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${isAvailable
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                       }`}
@@ -254,7 +273,7 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
                   <button
                     type="button"
                     onClick={() => handleStatusChange("disewa")}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${!isAvailable
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${!isAvailable
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                       }`}
@@ -274,8 +293,7 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
                 onClick={() => setShowDeleteDialog(true)}
                 className="w-full sm:w-auto text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
-                <span className="mr-2">🗑️</span>
-                Hapus Unit
+                <Icons.Trash2 className="mr-2 w-4 h-4" /> Hapus Unit
               </Button>
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                 <Button

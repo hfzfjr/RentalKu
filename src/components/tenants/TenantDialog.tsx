@@ -75,7 +75,7 @@ export function TenantDialog({ isOpen, onClose, onSave, tenant }: TenantDialogPr
           </h3>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors rounded-full p-1 hover:bg-muted"
+            className="text-muted-foreground hover:text-foreground transition-colors rounded-full p-1 hover:bg-muted cursor-pointer"
             aria-label="Close modal"
           >
             <span className="text-xl">×</span>

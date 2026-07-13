@@ -51,7 +51,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden text-muted-foreground hover:text-foreground p-2"
+            className="lg:hidden text-muted-foreground hover:text-foreground p-2 cursor-pointer"
             aria-label="Close sidebar"
           >
             <span className="text-xl">×</span>

@@ -25,7 +25,7 @@ export function SidebarLayout({ children, title, description, action }: SidebarL
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsSidebarOpen(true)}
-                className="lg:hidden text-muted-foreground hover:text-foreground p-2"
+                className="lg:hidden text-muted-foreground hover:text-foreground p-2 cursor-pointer"
                 aria-label="Open sidebar"
               >
                 <span className="text-xl">☰</span>

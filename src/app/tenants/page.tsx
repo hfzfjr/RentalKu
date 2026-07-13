@@ -6,6 +6,8 @@ import { Tenant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { TenantDialog } from "@/components/tenants/TenantDialog";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { Icons } from "@/components/icons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TenantsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -129,7 +131,7 @@ export default function TenantsPage() {
       description="Kelola data penyewa kendaraan."
       action={
         <Button onClick={handleOpenAddDialog}>
-          + Tambah Penyewa
+          <Icons.Plus />Tambah Penyewa
         </Button>
       }
     >
@@ -138,7 +140,7 @@ export default function TenantsPage() {
       <div className="mb-8">
         <div className="relative w-full md:w-96">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-            <span>🔍</span>
+            <Icons.Search className="w-4 h-4" />
           </div>
           <input
             type="text"
@@ -151,9 +153,36 @@ export default function TenantsPage() {
       </div>
 
       {/* Data Table / Cards */}
-      {filteredTenants.length === 0 ? (
+      {loading ? (
+        <div className="bg-card border rounded-lg shadow-sm overflow-hidden">
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-muted border-b">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Nama</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">No. HP</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">No. KTP</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Alamat</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-28" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-40" /></td>
+                    <td className="px-6 py-4 text-center"><Skeleton className="h-8 w-16 mx-auto" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : filteredTenants.length === 0 ? (
         <div className="text-center py-16">
-          <div className="text-6xl mb-4">👥</div>
+          <Icons.NoData className="text-6xl mb-4 mx-auto text-muted-foreground" />
           <h3 className="text-xl font-semibold text-foreground mb-2">
             {searchQuery ? "Tidak ditemukan" : "Belum ada data penyewa"}
           </h3>
@@ -170,7 +199,7 @@ export default function TenantsPage() {
         <div className="bg-card border rounded-lg shadow-sm overflow-hidden">
           {/* Desktop Table View */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-center border-collapse">
               <thead>
                 <tr className="bg-muted border-b">
                   <th className="px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -185,7 +214,7 @@ export default function TenantsPage() {
                   <th className="px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Alamat
                   </th>
-                  <th className="px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
+                  <th className="px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider text-center">
                     Aksi
                   </th>
                 </tr>
@@ -194,31 +223,26 @@ export default function TenantsPage() {
                 {paginatedTenants.map((tenant, index) => (
                   <tr key={tenant.id} className="hover:bg-muted/50 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full ${getAvatarColor(index)} flex items-center justify-center font-bold text-sm`}>
-                          {getInitials(tenant.nama)}
-                        </div>
-                        <span className="font-medium text-foreground">{tenant.nama}</span>
-                      </div>
+                      <span className="font-medium text-foreground">{tenant.nama}</span>
                     </td>
                     <td className="px-6 py-4 text-muted-foreground">{tenant.no_hp}</td>
                     <td className="px-6 py-4 font-mono text-sm text-muted-foreground">{tenant.no_ktp}</td>
                     <td className="px-6 py-4 text-muted-foreground max-w-50 truncate">{tenant.alamat}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex justify-center gap-2">
                         <button
                           onClick={() => handleOpenEditDialog(tenant)}
-                          className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
+                          className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors cursor-pointer"
                           title="Edit"
                         >
-                          ✏️
+                          <Icons.Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleOpenDeleteDialog(tenant)}
-                          className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
+                          className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors cursor-pointer"
                           title="Hapus"
                         >
-                          🗑️
+                          <Icons.Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -244,13 +268,13 @@ export default function TenantsPage() {
                       onClick={() => handleOpenEditDialog(tenant)}
                       className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
                     >
-                      ✏️
+                      <Icons.Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleOpenDeleteDialog(tenant)}
                       className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
                     >
-                      🗑️
+                      <Icons.Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -279,21 +303,21 @@ export default function TenantsPage() {
             </span>
             <div className="flex items-center gap-2">
               <button
-                className="p-2 rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
+                className="p-2 rounded text-muted-foreground hover:bg-muted disabled:opacity-50 cursor-pointer"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                ←
+                <Icons.LeftArrow className="w-4 h-4" />
               </button>
               <span className="text-sm text-foreground">
                 {currentPage} / {totalPages || 1}
               </span>
               <button
-                className="p-2 rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
+                className="p-2 rounded text-muted-foreground hover:bg-muted disabled:opacity-50 cursor-pointer"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages || totalPages === 0}
               >
-                →
+                <Icons.RightArrow className="w-4 h-4" />
               </button>
             </div>
           </div>

@@ -7,6 +7,8 @@ import { Rental, Unit, Tenant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Icons } from "@/components/icons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type StatusFilter = "semua" | "berlangsung" | "selesai";
 
@@ -101,7 +103,7 @@ export default function RentalsPage() {
       action={
         <Link href="/rentals/new">
           <Button className="whitespace-nowrap">
-            + Buat Penyewaan Baru
+            <Icons.Plus />Buat Penyewaan Baru
           </Button>
         </Link>
       }
@@ -119,9 +121,41 @@ export default function RentalsPage() {
       </div>
 
       {/* Data Table / Cards */}
-      {filteredRentals.length === 0 ? (
+      {loading ? (
+        <div className="bg-card border rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col">
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="w-full text-center border-collapse">
+              <thead className="bg-muted border-b">
+                <tr>
+                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Nama Penyewa</th>
+                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Unit Kendaraan</th>
+                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Tanggal Mulai</th>
+                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Tanggal Selesai</th>
+                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Harga</th>
+                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="py-4 px-4"><Skeleton className="h-4 w-32 mx-auto" /></td>
+                    <td className="py-4 px-4"><Skeleton className="h-4 w-24 mx-auto" /></td>
+                    <td className="py-4 px-4"><Skeleton className="h-4 w-28 mx-auto" /></td>
+                    <td className="py-4 px-4"><Skeleton className="h-4 w-28 mx-auto" /></td>
+                    <td className="py-4 px-4"><Skeleton className="h-4 w-20 mx-auto" /></td>
+                    <td className="py-4 px-4"><Skeleton className="h-6 w-16 mx-auto" /></td>
+                    <td className="py-4 px-4"><Skeleton className="h-8 w-16 mx-auto" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : filteredRentals.length === 0 ? (
         <div className="text-center py-16">
-          <div className="text-6xl mb-4">📋</div>
+          <Icons.NoData className="text-6xl mb-4 mx-auto text-muted-foreground" />
           <h3 className="text-xl font-semibold text-foreground mb-2">
             {statusFilter === "semua" ? "Belum ada transaksi penyewaan" : `Tidak ada transaksi ${statusFilter}`}
           </h3>
@@ -135,7 +169,7 @@ export default function RentalsPage() {
         <div className="bg-card border rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col">
           {/* Desktop Table View */}
           <div className="hidden lg:block overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-center border-collapse">
               <thead className="bg-muted border-b">
                 <tr>
                   <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -156,23 +190,18 @@ export default function RentalsPage() {
                   <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
+                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider text-center">
                     Aksi
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {filteredRentals.map((rental, index) => (
+                {filteredRentals.map((rental) => (
                   <tr key={rental.id} className="hover:bg-muted/50 transition-colors">
                     <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full ${getAvatarColor(index)} flex items-center justify-center text-sm font-medium`}>
-                          {rental.tenant ? getInitials(rental.tenant.nama) : "--"}
-                        </div>
-                        <span className="font-medium text-foreground">
-                          {rental.tenant?.nama || "Unknown"}
-                        </span>
-                      </div>
+                      <span className="font-medium text-foreground">
+                        {rental.tenant?.nama || "Unknown"}
+                      </span>
                     </td>
                     <td className="py-4 px-4 text-foreground">{rental.unit?.nama || "Unknown"}</td>
                     <td className="py-4 px-4 text-muted-foreground">{formatDate(rental.tanggal_mulai)}</td>
@@ -185,9 +214,9 @@ export default function RentalsPage() {
                         {rental.status === "selesai" ? "Selesai" : "Berlangsung"}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-right">
+                    <td className="py-4 px-4 text-center">
                       <Link href={`/rentals/${rental.id}`}>
-                        <button className="text-primary hover:text-primary/80 text-sm font-medium transition-colors">
+                        <button className="text-primary hover:text-primary/80 text-sm font-medium transition-colors cursor-pointer">
                           Detail
                         </button>
                       </Link>
@@ -250,11 +279,11 @@ export default function RentalsPage() {
               Menampilkan {filteredRentals.length} dari {rentalsWithDetails.length} transaksi
             </span>
             <div className="flex gap-2">
-              <button className="p-2 rounded border border-border text-muted-foreground hover:bg-muted disabled:opacity-50" disabled>
-                ←
+              <button className="p-2 rounded border border-border text-muted-foreground hover:bg-muted disabled:opacity-50 cursor-pointer" disabled>
+                <Icons.LeftArrow className="w-4 h-4" />
               </button>
-              <button className="p-2 rounded border border-border text-muted-foreground hover:bg-muted disabled:opacity-50" disabled>
-                →
+              <button className="p-2 rounded border border-border text-muted-foreground hover:bg-muted disabled:opacity-50 cursor-pointer" disabled>
+                <Icons.RightArrow className="w-4 h-4" />
               </button>
             </div>
           </div>
