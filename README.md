@@ -1,36 +1,174 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# RentalKu
+
+Aplikasi manajemen rental kendaraan berbasis web yang memudahkan pengelolaan unit kendaraan, data penyewa, dan status penyewaan.
+
+## Fitur
+
+- **Manajemen Unit Kendaraan**
+  - CRUD (Create, Read, Update, Delete) unit kendaraan
+  - Upload foto kendaraan
+  - Filter berdasarkan jenis kendaraan (mobil/motor) dan status ketersediaan
+  - Soft delete untuk menjaga integritas data
+
+- **Manajemen Data Penyewa**
+  - CRUD data penyewa
+  - Validasi data lengkap (nama, KTP, HP, alamat)
+  - Soft delete dengan pengecekan penyewaan aktif
+
+- **Manajemen Penyewaan**
+  - Buat transaksi penyewaan baru
+  - Lihat daftar penyewaan dengan filter status
+  - Detail penyewaan lengkap dengan perhitungan harga
+  - Selesaikan penyewaan dan update status unit otomatis
+
+- **Dashboard**
+  - Ringkasan statistik (total unit, unit tersedia, unit disewa, total penyewa)
+  - Daftar penyewaan terbaru
+
+## Tech Stack
+
+- **Framework**: Next.js 16.2.10 (App Router)
+- **Language**: TypeScript
+- **Styling**: TailwindCSS
+- **UI Components**: shadcn/ui
+- **Database**: Supabase (PostgreSQL)
+- **State Management**: React Hooks (useState, useEffect, useReducer)
+- **Icons**: Lucide React
+
+## Prerequisites
+
+- Node.js 18+ 
+- npm, yarn, pnpm, atau bun
+- Akun Supabase dengan project yang sudah disiapkan
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone Repository
 
-```bash
+`bash
+git clone <repository-url>
+cd rentalku
+`
+
+### 2. Install Dependencies
+
+`bash
+npm install
+# atau
+yarn install
+# atau
+pnpm install
+# atau
+bun install
+`
+
+### 3. Environment Setup
+
+Buat file .env.local di root project dan tambahkan:
+
+`env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+`
+
+### 4. Database Setup
+
+Jalankan SQL schema di file database.sql di Supabase SQL Editor untuk membuat tabel yang diperlukan:
+
+`sql
+-- Tabel: units, tenants, rentals
+-- Kolom is_deleted sudah ditambahkan untuk soft delete
+`
+
+### 5. Run Development Server
+
+`bash
 npm run dev
-# or
+# atau
 yarn dev
-# or
+# atau
 pnpm dev
-# or
+# atau
 bun dev
-```
+`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000) di browser untuk melihat aplikasi.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- npm run dev - Menjalankan development server
+- npm run build - Build untuk production
+- npm run lint - Run ESLint untuk code linting
 
-## Learn More
+## Struktur Project
 
-To learn more about Next.js, take a look at the following resources:
+`
+rentalku/
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   │   ├── units/              # Unit management pages
+│   │   │   ├── page.tsx        # Unit list
+│   │   │   ├── [id]/           # Unit detail
+│   │   │   │   └── page.tsx
+│   │   │   ├── [id]/edit/      # Unit edit
+│   │   │   │   └── page.tsx
+│   │   │   └── new/            # Create new unit
+│   │   │       └── page.tsx
+│   │   ├── tenants/            # Tenant management pages
+│   │   │   ├── page.tsx        # Tenant list
+│   │   │   └── TenantDialog.tsx # Add/Edit tenant modal
+│   │   ├── rentals/            # Rental management pages
+│   │   │   ├── page.tsx        # Rental list
+│   │   │   ├── [id]/           # Rental detail
+│   │   │   │   └── page.tsx
+│   │   │   └── new/            # Create new rental
+│   │   │       └── page.tsx
+│   │   └── page.tsx            # Dashboard
+│   ├── components/
+│   │   ├── ui/                 # shadcn/ui components
+│   │   ├── layout/             # Layout components
+│   │   ├── icons/              # Icon components
+│   │   ├── units/              # Unit-specific components
+│   │   └── tenants/            # Tenant-specific components
+│   └── lib/
+│       ├── supabase.ts         # Supabase client
+│       ├── types.ts            # TypeScript types
+│       └── utils.ts            # Utility functions
+├── public/                     # Static assets
+├── database.sql                # Database schema
+└── package.json                # Dependencies
+`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database Schema
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Units
+- id: Primary key
+- nama: Nama kendaraan
+- jenis: Jenis (motor/mobil)
+- plat_nomor: Plat nomor kendaraan
+- harga_sewa_per_hari: Harga sewa per hari
+- status: Status ketersediaan (tersedia/disewa)
+- image_url: URL foto kendaraan
+- tahun_produksi: Tahun produksi
+- is_deleted: Soft delete flag
+- created_at, updated_at: Timestamps
 
-## Deploy on Vercel
+### Tenants
+- id: Primary key
+- nama: Nama lengkap penyewa
+- no_ktp: Nomor KTP/NIK
+- no_hp: Nomor HP
+- alamat: Alamat lengkap
+- is_deleted: Soft delete flag
+- created_at, updated_at: Timestamps
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Rentals
+- id: Primary key
+- unit_id: Foreign key ke units
+- tenant_id: Foreign key ke tenants
+- tanggal_mulai: Tanggal mulai sewa
+- tanggal_selesai: Tanggal selesai sewa
+- status: Status penyewaan (berlangsung/selesai)
+- catatan: Catatan tambahan
+- is_deleted: Soft delete flag
+- created_at, updated_at: Timestamps
