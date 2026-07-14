@@ -82,7 +82,44 @@ Jalankan SQL schema di file database.sql di Supabase SQL Editor untuk membuat ta
 
 ### 5. Run Development Server
 
-```bash
+`bash
+git clone <repository-url>
+cd rentalku
+`
+
+### 2. Install Dependencies
+
+`bash
+npm install
+# atau
+yarn install
+# atau
+pnpm install
+# atau
+bun install
+`
+
+### 3. Environment Setup
+
+Buat file .env.local di root project dan tambahkan:
+
+`env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+`
+
+### 4. Database Setup
+
+Jalankan SQL schema di file database.sql di Supabase SQL Editor untuk membuat tabel yang diperlukan:
+
+`sql
+-- Tabel: units, tenants, rentals
+-- Kolom is_deleted sudah ditambahkan untuk soft delete
+`
+
+### 5. Run Development Server
+
+`bash
 npm run dev
 # atau
 yarn dev
@@ -90,7 +127,7 @@ yarn dev
 pnpm dev
 # atau
 bun dev
-```
+`
 
 Buka [http://localhost:3000](http://localhost:3000) di browser untuk melihat aplikasi.
 
