@@ -49,8 +49,8 @@ export default function NewRentalPage() {
   async function fetchData() {
     try {
       const [unitsData, tenantsData] = await Promise.all([
-        supabase.from('units').select('*'),
-        supabase.from('tenants').select('*'),
+        supabase.from('units').select('*').eq('is_deleted', false),
+        supabase.from('tenants').select('*').eq('is_deleted', false),
       ]);
 
       if (unitsData.error) throw unitsData.error;

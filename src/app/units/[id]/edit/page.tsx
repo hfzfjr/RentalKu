@@ -11,7 +11,7 @@ import { useAlert } from "@/components/ui/alert";
 export default function EditUnitPage() {
   const router = useRouter();
   const params = useParams();
-  const { alerts } = useAlert();
+  const { alerts, success, error } = useAlert();
   const [loading, setLoading] = useState(true);
   const [unitData, setUnitData] = useState<any>(null);
 
@@ -22,6 +22,7 @@ export default function EditUnitPage() {
           .from('units')
           .select('*')
           .eq('id', params.id)
+          .eq('is_deleted', false)
           .single();
 
         if (error) throw error;
@@ -56,13 +57,60 @@ export default function EditUnitPage() {
   };
 
   const handleDelete = async () => {
-    const { error: deleteError } = await supabase
-      .from('units')
-      .delete()
-      .eq('id', params.id);
+    try {
+      // Check if unit status is "disewa"
+      const { data: unitData, error: unitError } = await supabase
+        .from('units')
+        .select('status')
+        .eq('id', params.id)
+        .single();
 
-    if (deleteError) throw deleteError;
-    router.push('/units');
+      if (unitError) throw unitError;
+
+      if (unitData.status === 'disewa') {
+        error('Unit tidak dapat dihapus karena status masih disewa');
+        return;
+      }
+
+      // Check if there are any active rentals for this unit
+      const { data: activeRentals, error: rentalsError } = await supabase
+        .from('rentals')
+        .select('id')
+        .eq('unit_id', params.id)
+        .eq('status', 'berlangsung')
+        .eq('is_deleted', false);
+
+      if (rentalsError) throw rentalsError;
+
+      if (activeRentals && activeRentals.length > 0) {
+        error('Unit tidak dapat dihapus karena memiliki penyewaan yang sedang berlangsung');
+        return;
+      }
+
+      // Soft delete the unit
+      const { error: updateError } = await supabase
+        .from('units')
+        .update({ is_deleted: true })
+        .eq('id', params.id);
+
+      if (updateError) throw updateError;
+
+      // Soft delete all rentals associated with this unit
+      const { error: rentalsUpdateError } = await supabase
+        .from('rentals')
+        .update({ is_deleted: true })
+        .eq('unit_id', params.id);
+
+      if (rentalsUpdateError) throw rentalsUpdateError;
+
+      success('Unit berhasil dihapus');
+      setTimeout(() => {
+        router.push('/units');
+      }, 3000);
+    } catch (err: any) {
+      console.error('Error deleting unit:', err);
+      error('Gagal menghapus unit. Silakan coba lagi.');
+    }
   };
 
   if (loading) {

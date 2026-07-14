@@ -25,7 +25,7 @@ export function useAlert() {
     // Auto-dismiss after 3 seconds
     setTimeout(() => {
       setAlerts((prev) => prev.filter((a) => a.id !== id));
-    }, 3000);
+    }, 5000);
   };
 
   const success = (message: string) => addAlert(message, "success");

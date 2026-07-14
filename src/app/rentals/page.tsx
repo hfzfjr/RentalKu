@@ -26,9 +26,9 @@ export default function RentalsPage() {
   async function fetchData() {
     try {
       const [rentalsData, unitsData, tenantsData] = await Promise.all([
-        supabase.from('rentals').select('*').order('created_at', { ascending: false }),
-        supabase.from('units').select('*'),
-        supabase.from('tenants').select('*'),
+        supabase.from('rentals').select('*').eq('is_deleted', false).order('created_at', { ascending: false }),
+        supabase.from('units').select('*').eq('is_deleted', false),
+        supabase.from('tenants').select('*').eq('is_deleted', false),
       ]);
 
       if (rentalsData.error) throw rentalsData.error;

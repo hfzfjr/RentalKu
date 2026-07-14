@@ -35,6 +35,7 @@ export default function UnitDetailPage() {
         .from('units')
         .select('*')
         .eq('id', params.id)
+        .eq('is_deleted', false)
         .single();
 
       if (unitError) throw unitError;
@@ -53,6 +54,7 @@ export default function UnitDetailPage() {
           )
         `)
         .eq('unit_id', params.id)
+        .eq('is_deleted', false)
         .order('tanggal_mulai', { ascending: false });
 
       if (rentalsError) throw rentalsError;

@@ -46,6 +46,7 @@ export default function RentalDetailPage() {
           )
         `)
         .eq('id', params.id)
+        .eq('is_deleted', false)
         .single();
 
       if (fetchError) throw fetchError;

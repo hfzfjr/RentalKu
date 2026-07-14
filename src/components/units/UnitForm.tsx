@@ -158,7 +158,6 @@ export function UnitForm({ mode, initialData, onSubmit, onDelete, onCancel }: Un
     if (!onDelete) return;
     try {
       await onDelete();
-      success("Unit berhasil dihapus");
     } catch (deleteError) {
       console.error('Error deleting unit:', deleteError);
       error("Gagal menghapus unit. Silakan coba lagi.");
