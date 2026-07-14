@@ -252,7 +252,7 @@ function UnitCard({ unit }: { unit: Unit }) {
         </div>
 
         <div className="flex gap-2 mt-2">
-          <Link href={`/units/${unit.id}`} className="flex-1">
+          <Link href={`/units/${unit.id}/edit`} className="flex-1">
             <Button variant="outline" size="sm" className="w-full">
               Edit
             </Button>

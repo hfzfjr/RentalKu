@@ -3,7 +3,7 @@ import { FaCheckSquare, FaShoppingCart } from "react-icons/fa";
 import { HiOutlineClipboardDocumentList } from "react-icons/hi2";
 import { FiInbox } from "react-icons/fi";
 import { FaMotorcycle } from "react-icons/fa6";
-import { LuSearch, LuPlus, LuPencil, LuTrash2, LuChevronRight, LuChevronLeft, LuImagePlus } from "react-icons/lu";
+import { LuSearch, LuPlus, LuPencil, LuTrash2, LuChevronRight, LuChevronLeft, LuImagePlus, LuZoomIn, LuCalendar, LuChevronDown, LuCheck } from "react-icons/lu";
 
 export const Icons = {
   Dashboard: MdDashboard,
@@ -23,4 +23,9 @@ export const Icons = {
   LeftArrow: LuChevronLeft,
   CheckCircle: MdCheckCircle,
   AlertCircle: MdError,
+  ZoomIn: LuZoomIn,
+  ImagePlus: LuImagePlus,
+  Calendar: LuCalendar,
+  ChevronDown: LuChevronDown,
+  Check: LuCheck,
 };
