@@ -35,108 +35,6 @@ Aplikasi manajemen rental kendaraan berbasis web yang memudahkan pengelolaan uni
 - **State Management**: React Hooks (useState, useEffect, useReducer)
 - **Icons**: Lucide React
 
-## Prerequisites
-
-- Node.js 18+ 
-- npm, yarn, pnpm, atau bun
-- Akun Supabase dengan project yang sudah disiapkan
-
-## Getting Started
-
-### 1. Clone Repository
-
-```bash
-git clone <repository-url>
-cd rentalku
-```
-
-### 2. Install Dependencies
-
-```bash
-npm install
-# atau
-yarn install
-# atau
-pnpm install
-# atau
-bun install
-```
-
-### 3. Environment Setup
-
-Buat file .env.local di root project dan tambahkan:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-### 4. Database Setup
-
-Jalankan SQL schema di file database.sql di Supabase SQL Editor untuk membuat tabel yang diperlukan:
-
-```sql
--- Tabel: units, tenants, rentals
--- Kolom is_deleted sudah ditambahkan untuk soft delete
-```
-
-### 5. Run Development Server
-
-`bash
-git clone <repository-url>
-cd rentalku
-`
-
-### 2. Install Dependencies
-
-`bash
-npm install
-# atau
-yarn install
-# atau
-pnpm install
-# atau
-bun install
-`
-
-### 3. Environment Setup
-
-Buat file .env.local di root project dan tambahkan:
-
-`env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-`
-
-### 4. Database Setup
-
-Jalankan SQL schema di file database.sql di Supabase SQL Editor untuk membuat tabel yang diperlukan:
-
-`sql
--- Tabel: units, tenants, rentals
--- Kolom is_deleted sudah ditambahkan untuk soft delete
-`
-
-### 5. Run Development Server
-
-`bash
-npm run dev
-# atau
-yarn dev
-# atau
-pnpm dev
-# atau
-bun dev
-`
-
-Buka [http://localhost:3000](http://localhost:3000) di browser untuk melihat aplikasi.
-
-## Available Scripts
-
-- ```bash npm run dev``` - Menjalankan development server
-- ```bash npm run build``` - Build untuk production
-- ```bash npm run lint``` - Run ESLint untuk code linting
-
 ## Struktur Project
 
 ```bash
@@ -176,36 +74,106 @@ rentalku/
 └── package.json                # Dependencies
 ```
 
+## Prerequisites
+
+- Node.js 18+ 
+- npm, yarn, pnpm, atau bun
+- Akun Supabase dengan project yang sudah disiapkan
+
+## Getting Started
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/hfzfjr/RentalKu.git
+cd rentalku
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+# atau
+yarn install
+# atau
+pnpm install
+# atau
+bun install
+```
+
+### 3. Environment Setup
+
+Copy file `.env.example` ke `.env.local` dan isi dengan kredensial Supabase Anda:
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 4. Database Setup
+
+Jalankan SQL schema di file `database.sql` di Supabase SQL Editor untuk membuat tabel yang diperlukan:
+
+```sql
+-- Tabel: units, tenants, rentals
+```
+
+### 5. Run Development Server
+
+```bash
+npm run dev
+# atau
+yarn dev
+# atau
+pnpm dev
+# atau
+bun dev
+```
+
+Buka [http://localhost:3000](http://localhost:3000) di browser untuk melihat aplikasi.
+
+## Available Scripts
+
+- `npm run dev` - Menjalankan development server
+- `npm run build` - Build untuk production
+- `npm run lint` - Run ESLint untuk code linting
+
 ## Database Schema
 
 ### Units
-- id: Primary key
-- nama: Nama kendaraan
-- jenis: Jenis (motor/mobil)
-- plat_nomor: Plat nomor kendaraan
-- harga_sewa_per_hari: Harga sewa per hari
-- status: Status ketersediaan (tersedia/disewa)
-- image_url: URL foto kendaraan
-- tahun_produksi: Tahun produksi
-- is_deleted: Soft delete flag
-- created_at, updated_at: Timestamps
+- `id`: Primary key
+- `nama`: Nama kendaraan
+- `jenis`: Jenis (motor/mobil)
+- `plat_nomor`: Plat nomor kendaraan
+- `harga_sewa_per_hari`: Harga sewa per hari
+- `status`: Status ketersediaan (tersedia/disewa)
+- `image_url`: URL foto kendaraan
+- `tahun_produksi`: Tahun produksi
+- `is_deleted`: Soft delete flag
+- `created_at`, `updated_at`: Timestamps
 
 ### Tenants
-- id: Primary key
-- nama: Nama lengkap penyewa
-- no_ktp: Nomor KTP/NIK
-- no_hp: Nomor HP
-- alamat: Alamat lengkap
-- is_deleted: Soft delete flag
-- created_at, updated_at: Timestamps
+- `id`: Primary key
+- `nama`: Nama lengkap penyewa
+- `no_ktp`: Nomor KTP/NIK
+- `no_hp`: Nomor HP
+- `alamat`: Alamat lengkap
+- `is_deleted`: Soft delete flag
+- `created_at`, `updated_at`: Timestamps
 
 ### Rentals
-- id: Primary key
-- unit_id: Foreign key ke units
-- tenant_id: Foreign key ke tenants
-- tanggal_mulai: Tanggal mulai sewa
-- tanggal_selesai: Tanggal selesai sewa
-- status: Status penyewaan (berlangsung/selesai)
-- catatan: Catatan tambahan
-- is_deleted: Soft delete flag
-- created_at, updated_at: Timestamps
+- `id`: Primary key
+- `unit_id`: Foreign key ke units
+- `tenant_id`: Foreign key ke tenants
+- `tanggal_mulai`: Tanggal mulai sewa
+- `tanggal_selesai`: Tanggal selesai sewa
+- `status`: Status penyewaan (berlangsung/selesai)
+- `catatan`: Catatan tambahan
+- `is_deleted`: Soft delete flag
+- `created_at`, `updated_at`: Timestamps
