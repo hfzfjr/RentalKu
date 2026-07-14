@@ -217,18 +217,21 @@ export default function NewRentalPage() {
                       )}
                     </label>
                     <Popover open={unitPopoverOpen} onOpenChange={setUnitPopoverOpen}>
-                      <PopoverTrigger>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-between"
-                        >
+                      <PopoverTrigger
+                        className={cn(
+                          "w-full flex items-center justify-between px-3 py-2 bg-background border rounded-md text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer",
+                          !formData.unit_id && "text-muted-foreground"
+                        )}
+                      >
+                        <span className="flex items-center">
+                          <Icons.Calendar className="mr-2 h-4 w-4" />
                           {formData.unit_id
                             ? availableUnits.find((unit) => unit.id === formData.unit_id)?.nama
                             : "Pilih kendaraan..."}
-                          <Icons.ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
+                        </span>
+                        <Icons.ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </PopoverTrigger>
-                      <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0">
+                      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
                         <Command>
                           <CommandInput
                             placeholder="Cari kendaraan..."
@@ -273,18 +276,21 @@ export default function NewRentalPage() {
                       )}
                     </label>
                     <Popover open={tenantPopoverOpen} onOpenChange={setTenantPopoverOpen}>
-                      <PopoverTrigger>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-between"
-                        >
+                      <PopoverTrigger
+                        className={cn(
+                          "w-full flex items-center justify-between px-3 py-2 bg-background border rounded-md text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer",
+                          !formData.tenant_id && "text-muted-foreground"
+                        )}
+                      >
+                        <span className="flex items-center">
+                          <Icons.People className="mr-2 h-4 w-4" />
                           {formData.tenant_id
                             ? tenants.find((tenant) => tenant.id === formData.tenant_id)?.nama
                             : "Cari nama penyewa..."}
-                          <Icons.ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
+                        </span>
+                        <Icons.ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </PopoverTrigger>
-                      <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0">
+                      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
                         <Command>
                           <CommandInput
                             placeholder="Cari nama atau no HP..."
@@ -337,17 +343,14 @@ export default function NewRentalPage() {
                       )}
                     </label>
                     <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
-                      <PopoverTrigger>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !formData.tanggal_mulai && "text-muted-foreground"
-                          )}
-                        >
-                          <Icons.Calendar className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "dd MMMM yyyy", { locale: id }) : "Pilih tanggal"}
-                        </Button>
+                      <PopoverTrigger
+                        className={cn(
+                          "w-full flex items-center justify-start px-3 py-2 bg-background border rounded-md text-sm font-normal text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer",
+                          !formData.tanggal_mulai && "text-muted-foreground"
+                        )}
+                      >
+                        <Icons.Calendar className="mr-2 h-4 w-4" />
+                        {startDate ? format(startDate, "dd MMMM yyyy", { locale: id }) : "Pilih tanggal"}
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
@@ -388,19 +391,16 @@ export default function NewRentalPage() {
                       )}
                     </label>
                     <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
-                      <PopoverTrigger>
-                        <Button
-                          variant="outline"
-                          disabled={!formData.tanggal_mulai}
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !formData.tanggal_selesai && "text-muted-foreground"
-                          )}
-                          title={!formData.tanggal_mulai ? "Pilih Tanggal Mulai terlebih dahulu" : undefined}
-                        >
-                          <Icons.Calendar className="mr-2 h-4 w-4" />
-                          {endDate ? format(endDate, "dd MMMM yyyy", { locale: id }) : "Pilih tanggal"}
-                        </Button>
+                      <PopoverTrigger
+                        disabled={!formData.tanggal_mulai}
+                        className={cn(
+                          "w-full flex items-center justify-start px-3 py-2 bg-background border rounded-md text-sm font-normal text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+                          !formData.tanggal_selesai && "text-muted-foreground"
+                        )}
+                        title={!formData.tanggal_mulai ? "Pilih Tanggal Mulai terlebih dahulu" : undefined}
+                      >
+                        <Icons.Calendar className="mr-2 h-4 w-4" />
+                        {endDate ? format(endDate, "dd MMMM yyyy", { locale: id }) : "Pilih tanggal"}
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
@@ -483,7 +483,6 @@ export default function NewRentalPage() {
                   disabled={!isFormValid || availableUnits.length === 0}
                   className="w-full"
                 >
-                  <span className="mr-2">✓</span>
                   Buat Penyewaan
                 </Button>
                 <p className="text-xs text-muted-foreground text-center mt-2">
