@@ -234,14 +234,14 @@ function UnitCard({ unit }: { unit: Unit }) {
 
       {/* Card Content */}
       <div className="p-4 flex flex-col gap-2 flex-1">
-        <div className="flex justify-between items-start">
+        <div>
           <div>
             <h3 className="font-semibold text-foreground">{unit.nama}</h3>
-            <p className="text-xs text-muted-foreground mt-1">{unit.tahun_produksi}</p>
+            <div className="flex justify-between items-center mt-1">
+              <p className="text-xs text-muted-foreground">{unit.tahun_produksi}</p>
+              <span className="text-xs text-muted-foreground uppercase">{unit.plat_nomor}</span>
+            </div>
           </div>
-          <span className="text-muted-foreground bg-muted p-1.5 rounded-md text-sm">
-            {vehicleIcon === "two_wheeler" ? <Icons.Motorcycle className="text-sm" /> : <Icons.Car className="text-sm" />}
-          </span>
         </div>
 
         <div className="mt-auto pt-3 border-t border-border/50">

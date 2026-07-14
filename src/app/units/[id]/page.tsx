@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Unit } from "@/lib/types";
@@ -19,9 +19,12 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
     harga_sewa_per_hari: 0,
     status: "tersedia" as "tersedia" | "disewa",
     image_url: "",
+    tahun_produksi: "",
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchUnit();
@@ -45,7 +48,9 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
           harga_sewa_per_hari: data.harga_sewa_per_hari,
           status: data.status,
           image_url: data.image_url || "",
+          tahun_produksi: data.tahun_produksi?.toString() || "",
         });
+        setImagePreview(data.image_url || null);
       }
     } catch (error) {
       console.error('Error fetching unit:', error);
@@ -58,12 +63,62 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "harga_sewa_per_hari" ? Number(value) : value,
+      [name]: name === "harga_sewa_per_hari" || name === "tahun_produksi" ? Number(value) : value,
     }));
   };
 
   const handleStatusChange = (status: "tersedia" | "disewa") => {
     setFormData((prev) => ({ ...prev, status }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.match(/image\/(jpeg|jpg|png)$/)) {
+        alert("Format file harus JPG atau PNG");
+        return;
+      }
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Ukuran file maksimal 5MB");
+        return;
+      }
+
+      try {
+        // Generate unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('units image')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('units image')
+          .getPublicUrl(filePath);
+
+        // Update state with public URL
+        setImagePreview(publicUrl);
+        setFormData((prev) => ({ ...prev, image_url: publicUrl }));
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert("Gagal mengupload gambar. Silakan coba lagi.");
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setFormData((prev) => ({ ...prev, image_url: "" }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleSave = async () => {
@@ -77,6 +132,7 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
           harga_sewa_per_hari: formData.harga_sewa_per_hari,
           status: formData.status,
           image_url: formData.image_url || null,
+          tahun_produksi: formData.tahun_produksi,
         })
         .eq('id', params.id);
 
@@ -156,24 +212,51 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
         <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
           {/* Left Column: Photo */}
           <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-4">
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden border bg-muted group">
-              {unit.image_url ? (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            <div
+              className="relative w-full aspect-square rounded-lg overflow-hidden border bg-muted group cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {imagePreview ? (
                 <img
                   alt="Vehicle Photo"
                   className="w-full h-full object-cover"
-                  src={unit.image_url}
+                  src={imagePreview}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
                   <Icons.Car className="text-6xl text-muted-foreground" />
                 </div>
               )}
-              {/* Overlay for edit */}
+              {/* Overlay for edit/remove */}
               <div className="absolute inset-0 bg-foreground/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button className="bg-background text-primary px-4 py-2 rounded-lg shadow-sm hover:bg-muted transition-colors flex items-center gap-2 text-sm font-medium cursor-pointer">
-                  <span>📷</span>
-                  Ganti Foto
-                </button>
+                {imagePreview ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage();
+                    }}
+                    className="bg-background text-destructive px-4 py-2 rounded-lg shadow-sm hover:bg-muted transition-colors flex items-center gap-2 text-sm font-medium cursor-pointer"
+                  >
+                    <Icons.Trash2 className="w-4 h-4" />
+                    Hapus Foto
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="bg-background text-primary px-4 py-2 rounded-lg shadow-sm hover:bg-muted transition-colors flex items-center gap-2 text-sm font-medium cursor-pointer"
+                  >
+                    <Icons.Plus className="w-4 h-4" />
+                    Ganti Foto
+                  </button>
+                )}
               </div>
             </div>
             <p className="text-sm text-muted-foreground text-center">
@@ -233,6 +316,24 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
                   value={formData.plat_nomor}
                   onChange={handleInputChange}
                   className="w-full bg-background border rounded-lg px-4 py-2 text-foreground uppercase focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+              </div>
+
+              {/* Tahun Produksi */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="tahun_produksi" className="text-sm font-medium text-muted-foreground">
+                  Tahun Produksi
+                </label>
+                <input
+                  id="tahun_produksi"
+                  name="tahun_produksi"
+                  type="number"
+                  value={formData.tahun_produksi}
+                  onChange={handleInputChange}
+                  placeholder="Contoh: 2022"
+                  min="1900"
+                  max="2099"
+                  className="w-full bg-background border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
 

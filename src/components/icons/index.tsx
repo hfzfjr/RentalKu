@@ -1,9 +1,9 @@
-import { MdDashboard, MdDirectionsCar, MdPeople, MdReceiptLong } from "react-icons/md";
+import { MdDashboard, MdDirectionsCar, MdPeople, MdReceiptLong, MdCheckCircle, MdError } from "react-icons/md";
 import { FaCheckSquare, FaShoppingCart } from "react-icons/fa";
 import { HiOutlineClipboardDocumentList } from "react-icons/hi2";
 import { FiInbox } from "react-icons/fi";
 import { FaMotorcycle } from "react-icons/fa6";
-import { LuSearch, LuPlus, LuPencil, LuTrash2, LuChevronRight, LuChevronLeft } from "react-icons/lu";
+import { LuSearch, LuPlus, LuPencil, LuTrash2, LuChevronRight, LuChevronLeft, LuImagePlus } from "react-icons/lu";
 
 export const Icons = {
   Dashboard: MdDashboard,
@@ -21,4 +21,6 @@ export const Icons = {
   Trash2: LuTrash2,
   RightArrow: LuChevronRight,
   LeftArrow: LuChevronLeft,
+  CheckCircle: MdCheckCircle,
+  AlertCircle: MdError,
 };
